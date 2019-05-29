@@ -12,7 +12,7 @@ def load_cws_result_from_pos_as_input(path: str):
         pos_result_raw = pos_file.read()
 
     all_cws_word = [[word_pos.rsplit(
-        '/')[0] for word_pos in line.split(' ')] for line in pos_result_raw.split('\n')]
+        '/', 1)[0] for word_pos in line.split(' ')] for line in pos_result_raw.split('\n')]
 
     return all_cws_word
 
