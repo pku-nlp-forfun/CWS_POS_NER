@@ -30,17 +30,16 @@ def processing_pos_data(path: str = POS_DATA['Train']):
                 pos = ''
                 # this_is_shit = True
 
-            # Into trainable format for CWS #
-
+            # Trainable format for CWS #
             if len(word) == 1:  # single word
                 label = 'S'
                 sentence_list.append((word, label))
             elif this_is_shit:  # currently don't use
-                # ('$$_', 'S')
+                # e.g. ('$$_', 'S')
                 label = 'S'  # or maybe O?!
                 sentence_list.append((word, label))
-            else:
-                ('$', 'B'), ('$', 'M'), ('_', 'E')
+            else:  # normal case (and weird case)
+                # e.g. ('$', 'B'), ('$', 'M'), ('_', 'E')
                 for i, char in enumerate(word):
                     if i == 0:
                         label = 'B'
