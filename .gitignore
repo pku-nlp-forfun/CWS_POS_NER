@@ -354,3 +354,7 @@ TSWLatexianTemp*
 *.spl
 
 __latexindent_temp.tex
+
+# Our result
+Result/
+Evaluation.md

@@ -10,6 +10,16 @@ Using the most frequent/common POS tagging table as the result.
 
 * For the space character `$$_` or something that don't have POS tag but it may should have -_-". I'll set empty string `''` as its POS.
 
+## Performance
+
+### Using Gold CWS (from POS file) and Test the Pure Mapping Model
+
+> first attemption
+
+| Precision | Recall | F1 Score |
+| --------- | ------ | -------- |
+| 91.92     | 92.33  | 92.13    |
+
 ## Resources
 
 * [NLP-progress - Part-of-speech tagging](http://nlpprogress.com/english/part-of-speech_tagging.html)
@@ -23,6 +33,10 @@ CRF
 HMM
 
 * [An introduction to part-of-speech tagging and the Hidden Markov Model](https://www.freecodecamp.org/news/an-introduction-to-part-of-speech-tagging-and-the-hidden-markov-model-953d45338f24/)
+
+Bi-LSTM + CRF
+
+* [Sequence Tagging with Tensorflow](https://guillaumegenthial.github.io/sequence-tagging-with-tensorflow.html)
 
 Brief Description
 
