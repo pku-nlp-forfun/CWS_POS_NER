@@ -40,3 +40,10 @@ Bi-LSTM
 * [chantera/blstm-cws](https://github.com/chantera/blstm-cws)
   * [data/download.sh](https://github.com/chantera/blstm-cws/blob/master/data/download.sh)
 * [luozhouyang/deepseg](https://github.com/luozhouyang/deepseg)
+
+### Appendix - Tensorflow CRF API
+
+* [tensorflow/contrib/crf](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/crf)
+* [documentation](https://www.tensorflow.org/api_docs/python/tf/contrib/crf)
+  * [tf.contrib.crf.crf_log_likelihood](https://www.tensorflow.org/api_docs/python/tf/contrib/crf/crf_log_likelihood)
+  * [tf.contrib.crf.crf_decode](https://www.tensorflow.org/api_docs/python/tf/contrib/crf/crf_decode)
