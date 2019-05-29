@@ -12,6 +12,16 @@
 
 ![Bi-LSTM with CRF](https://pic1.zhimg.com/80/v2-aad7ef8156b33c51efeb0f7f4b6f614d_hd.jpg)
 
+## Approach
+
+1. Data preprocessing into the classification problem
+2. Word representation
+   1. One-hot
+   2. TF-IDF
+   3. ...
+3. Training model
+4. Predict and generate result
+
 ## Resources
 
 ### Corpus

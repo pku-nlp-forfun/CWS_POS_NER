@@ -2,6 +2,38 @@
 
 Chinese word segmentation, Part-of-speech tagging and Medical named entity recognition From scratch.
 
+## Getting Started
+
+Dependencies:
+
+* tensorflow
+
+```sh
+# training, testing and evaluation
+python3 run.py
+```
+
+### Structure
+
+```txt
+├── Data         => data set given by TA
+│   ├── devset
+│   ├── testset1
+│   └── trainset
+├── Evaluation   => eval scripts given by TA
+|
+├── CWS          => CWS model
+├── POS          => POS tagging model
+├── NER          => NER model
+|
+├── constant.py  => some global constants and variables
+|
+├── dataset.py   => data preprocessing
+├── model.py     => high-level model API for all our model
+├── evaluate.py  => high-level evaluation API
+└── run.py       => the entire process
+```
+
 ## Task Description
 
 ### Directory Structure
@@ -43,3 +75,13 @@ booktitle = {The 50th Annual Meeting of the Association for Computational Lingui
 pages = {253--262},
 year = {2012}}
 ```
+
+### Related Tools
+
+#### CRF
+
+* [tensorflow/contrib/crf](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/crf)
+* [CRFsuite](http://www.chokkan.org/software/crfsuite/) - A fast implementation of Conditional Random Fields (CRFs)
+  * [chokkan/crfsuite](https://github.com/chokkan/crfsuite)
+* [sklearn-crfsuite](https://sklearn-crfsuite.readthedocs.io/en/latest/)
+  * [TeamHG-Memex/sklearn-crfsuite](https://github.com/TeamHG-Memex/sklearn-crfsuite)
