@@ -2,3 +2,11 @@
 \label{sec:result}
 
 （描述实验结果并分析原因）
+
+\subsection*{Part-of-speech Tagging}
+
+\subsubsection*{Test on the gold word segmentation result}
+
+在这个测试之中，排除了分词错误的可能性，利用从 testset1 中的 test\_pos1.txt 中提取出分词结果（不使用 test\_cws1.txt 是因为里面的 tag 全是乱的完全无法使用）。（表~\ref{tab:pos_on_gold_cws}）
+
+\input{figures/pos_on_gold_cws.tex}
