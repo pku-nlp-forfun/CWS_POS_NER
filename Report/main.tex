@@ -1,0 +1,69 @@
+\documentclass[12pt]{article}
+\usepackage[UTF8]{ctex} % using Chinese
+
+\usepackage{mathptmx}
+
+\usepackage{geometry}
+\geometry{a4paper, scale=0.8}
+
+% For prettier tables
+% replace \hline with \toprule, \midrule and \bottomrule
+\usepackage{booktabs}
+
+% For list spacing
+\usepackage{enumitem}
+\setlist{noitemsep}
+
+% For multi-column
+\usepackage{multicol}
+\setlength{\columnsep}{1cm}
+
+% For graphic/figure
+\usepackage{graphicx}
+
+% For prettier \maketitle
+\usepackage{titling} 
+\renewcommand\maketitlehooka{\null\mbox{}\vfill}
+\renewcommand\maketitlehookd{\vfill\null}
+
+\title{
+  {NLP Course Report}  \\
+  \textbf{Chinese Word Segmentation and POS Tagging}
+}
+\author{
+  {Peking University} \\
+  {1801210840} \textbf{Hui-Qiang Jiang} \\
+  {1701210963} \textbf{Da-Wei Lee}
+}
+\date{\today}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\newpage
+
+\tableofcontents
+\thispagestyle{empty}
+
+\clearpage
+\pagenumbering{arabic}
+
+\input{sections/purpose.tex}
+
+\input{sections/principle.tex}
+
+\input{sections/experiment.tex}
+
+\input{sections/result.tex}
+
+\input{sections/analysis.tex}
+
+\input{sections/question.tex}
+
+\input{sections/conclusion.tex}
+
+\bibliographystyle{acm}
+\bibliography{citedbibtex}
+
+\end{document}
