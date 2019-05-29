@@ -1,5 +1,6 @@
 from dataset import processing_pos_data, get_raw_article_from_cws_data
 from constant import POS_DATA, CWS_DATA
+from evaluate import total_evaluate
 
 
 def main():
@@ -21,6 +22,7 @@ def main():
 
     # Evaluate
     print('Evaluating...')
+    total_evaluate(CWS_DATA['Test'], CWS_DATA['Test'], POS_DATA['Test'], POS_DATA['Test'], verbose=True)
 
 
 if __name__ == "__main__":
