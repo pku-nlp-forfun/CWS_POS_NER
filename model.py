@@ -1,3 +1,4 @@
+import pickle
 from enum import Enum
 from typing import List
 
@@ -18,25 +19,33 @@ class CWSModel:
 
     def __init__(self, train_set: List, dev_set: List, test_set: List):
         self.MAX_LEN = 0
+        self.origin_test_set = test_set
         self.statistical_data(train_set, dev_set, test_set)
 
-    def statistical_data(self, train_set: List, dev_set: List, test_set: List):
+    def statistical_data(self, train_set: List, dev_set: List, test_set: List, do_reshape: bool=True):
         ''' statistical data '''
         word_list = sum([[jj[0] for jj in ii] for ii in train_set], [])
         word_set = ['[OOV]', *list(set(word_list))]
         echo(1, len(word_list))
         word2id = {jj: ii for ii, jj in enumerate(word_set)}
 
-        # dev_set = [[(word2id[jj] if jj in word2id else 0, con.CWS_LAB2ID[kk])
-        #             for jj, kk in ii] for ii in dev_set]
-        # test_set = [[(word2id[jj] if jj in word2id else 0, con.CWS_LAB2ID[kk])
-        #              for jj, kk in ii] for ii in test_set]
-        self.word2id = word2id
-        self.train_set = self.reshape_data(train_set)
-        self.dev_set = self.reshape_data(dev_set)
-        self.test_set = self.reshape_data(test_set)
-        # self.dev_set = dev_set
-        # self.test_set = test_set
+        if not do_reshape:
+            train_set = [[(word2id[jj] if jj in word2id else 0, con.CWS_LAB2ID[kk])
+                        for jj, kk in ii] for ii in train_set]
+            dev_set = [[(word2id[jj] if jj in word2id else 0, con.CWS_LAB2ID[kk])
+                        for jj, kk in ii] for ii in dev_set]
+            test_set = [[(word2id[jj] if jj in word2id else 0, con.CWS_LAB2ID[kk])
+                         for jj, kk in ii] for ii in test_set]
+            self.train_set = train_set
+            self.dev_set = dev_set
+            self.test_set = test_set
+        else:
+            ''' a way to reduce memory using '''
+            self.word2id = word2id
+            self.train_set = self.reshape_data(train_set)
+            self.dev_set = self.reshape_data(dev_set)
+            self.test_set = self.reshape_data(test_set)
+
 
     def reshape_data(self, origin_set: List, MAX_LEN: int = 200) -> List:
         ''' reshape data '''
@@ -83,8 +92,17 @@ class CWSModel:
         dev_x, dev_y, dev_seq = self.prepare_data(self.dev_set)
         test_x, test_y, test_seq = self.prepare_data(self.test_set)
         print('Prepare Over')
-        crf_tf(train_x, train_y, train_seq, dev_x,
-               dev_y, dev_seq, test_x, test_y, test_seq, len(con.CWS_LAB2ID))
+        test_predict = crf_tf(train_x, train_y, train_seq, dev_x, dev_y, dev_seq, test_x, test_y, test_seq, len(con.CWS_LAB2ID))
+        test_predict = test_predict.reshape(-1)
+        idx, test_predict_text = 0, []
+        for ii in self.origin_test_set:
+            temp_len = len(ii)
+            temp_tag = test_predict[idx: idx + temp_len]
+            temp_text = ''.join([f'{kk[0]}{"" if temp_tag[jj] < 2 else " "}' for jj, kk in enumerate(ii)]).strip()
+            test_predict_text.append(temp_text)
+            idx += temp_len
+        with open(con.RESULT['CWS'], 'w') as f:
+            f.write('\n'.join(test_predict_text))
 
 
 # Knowledge graph for POS tagging
