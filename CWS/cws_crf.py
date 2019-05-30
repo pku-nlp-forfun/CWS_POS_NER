@@ -2,7 +2,7 @@
 # @Author: gunjianpan
 # @Date:   2019-05-28 22:24:44
 # @Last Modified by:   gunjianpan
-# @Last Modified time: 2019-05-30 16:24:16
+# @Last Modified time: 2019-05-30 17:35:25
 
 import constant as con
 import numpy as np
@@ -37,8 +37,10 @@ def mask(num_word: int, seq_len: List):
 def evaluation(y: List, y_predict: List, mask, total_label, types: str):
     # print(y.shape, y_predict.shape, mask.shape)
     y = sum([list(jj[:sum(mask[ii])]) for ii, jj in enumerate(y)], [])
+    y = [int(ii > 1) for ii in y]
     y_predict = sum([list(jj[:sum(mask[ii])])
                      for ii, jj in enumerate(y_predict)], [])
+    y_predict = [int(ii > 1) for ii in y_predict]
 
     # correct_labels = np.sum((y == y_predict) * mask)
     # accuracy = 100.0 * correct_labels / float(total_label)
@@ -52,7 +54,7 @@ def evaluation(y: List, y_predict: List, mask, total_label, types: str):
 def fastF1(result, predict):
     ''' multi-class f1 score '''
     true_total, r_total, p_total, p, r, total_list = 0, 0, 0, 0, 0, []
-    class_num = len(con.CWS_LAB2ID)
+    class_num = 2
 
     for trueValue in range(class_num):
         trueNum, recallNum, precisionNum = 0, 0, 0
@@ -152,6 +154,9 @@ def crf_tf(train_x: List, train_y: List, train_seq: List,
                     pickle.dump(test_predict, open(f"{con.RESULT['CWS']}.pkl", 'wb'))
                     test_p, test_r, test_macro_f1, test_micro_f1 = evaluation(
                         test_y, test_predict, test_mask, test_total, 'Test')
+                        
+        log(f"Best Dev Macro_f1: {best_dev_acc:.2f}%")
+        log(f"Best Test P: {test_p:.2f}%, R: {test_r:.2f}%, Macro_f1: {test_macro_f1:.2f}%, Micro_f1: {test_micro_f1:.2f}%")
 
         echo(0, f"Best Dev Macro_f1: {best_dev_acc:.2f}%")
         echo(0, f"Best Test P: {test_p:.2f}%, R: {test_r:.2f}%, Macro_f1: {test_macro_f1:.2f}%, Micro_f1: {test_micro_f1:.2f}%")
