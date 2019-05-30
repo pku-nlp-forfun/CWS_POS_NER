@@ -404,8 +404,8 @@ def score(sReference, sCandidate, tag_num=1, verbose=False, is_cws:bool=False):
     nTotalPrediction = 0
     nCandidateWords = 0
     nReferenceWords = 0
-    reference = readNonEmptySentenceList(sReference, is_cws)
-    candidate = readNonEmptySentenceList(sCandidate, is_cws)
+    reference = readNonEmptySentenceList(sReference, is_cws=is_cws)
+    candidate = readNonEmptySentenceList(sCandidate, is_cws=is_cws)
     assert len(reference) == len(candidate)
     for lReference, lCandidate in zip(reference, candidate):
         n = len(lCandidate)
