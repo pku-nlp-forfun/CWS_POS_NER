@@ -1,11 +1,13 @@
-import pickle
-from enum import Enum
-from typing import List
-
-import numpy as np
-
 import constant as con
+import numpy as np
+import pickle
+
 from CWS.cws_crf import crf_tf
+from enum import Enum
+from sklearn.feature_extraction import DictVectorizer
+from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.pipeline import make_pipeline
+from typing import List
 from util import echo
 
 
@@ -19,6 +21,8 @@ class CWSModel:
 
     def __init__(self, train_set: List, dev_set: List, test_set: List):
         self.MAX_LEN = 0
+        self.origin_train_set = train_set
+        self.origin_dev_set = dev_set
         self.origin_test_set = test_set
         self.statistical_data(train_set, dev_set, test_set)
 
@@ -62,16 +66,17 @@ class CWSModel:
                             for ii, jj in enumerate(reshape_data)]
         return reshape_data
 
-    def prepare_data(self, origin_set: List, embed_type: EMBED_TYPE = EMBED_TYPE.ONE_HOT) -> (List, List, List):
+    def prepare_data(self, now_set: List, origin_set:List, embed_type: EMBED_TYPE = EMBED_TYPE.ONE_HOT) -> (List, List, List):
         ''' prepare_data '''
-        MAX_LEN = max([len(ii) for ii in origin_set])
+        MAX_LEN = max([len(ii) for ii in now_set])
         print(f'MAX_LEN{MAX_LEN}')
-        seq_len = [len(ii) for ii in origin_set]
-        x = self.pad_pattern(origin_set, 0, MAX_LEN)
-        y = self.pad_pattern(origin_set, 1, MAX_LEN)
+        seq_len = [len(ii) for ii in now_set]
+        seq = [len(ii) for ii in origin_set]
+        x = self.pad_pattern(now_set, 0, MAX_LEN)
+        y = self.pad_pattern(now_set, 1, MAX_LEN)
         if embed_type == EMBED_TYPE.ONE_HOT:
             x = self.one_hot(x)
-        return x, y, seq_len
+        return x, y, seq_len, seq
 
     def pad_pattern(self, origin_set: List, idx: int, MAX_LEN: int) -> List:
         ''' pad pattern '''
@@ -86,13 +91,23 @@ class CWSModel:
 
         return np.squeeze(np.eye(num_fea)[word_set.reshape(-1)]).reshape([num_seq, num_word, num_fea])
 
+    def tf_idf(self, word_set:List):
+        ''' tf-idf embed'''
+        word_set = np.array(word_set)
+        num_fea = len(self.word2id)
+        num_seq, num_word = word_set.shape
+        echo(0, num_seq, num_word, num_fea)
+        to_pipeline = [DictVectorizer(), TfidfTransformer()]
+        data_transformer = make_pipeline(*to_pipeline)
+        transformed = data_transformer.fit_transform(word_set.reshape(-1)).todense()
+
     def run_model(self):
         ''' run crf model '''
-        train_x, train_y, train_seq = self.prepare_data(self.train_set)
-        dev_x, dev_y, dev_seq = self.prepare_data(self.dev_set)
-        test_x, test_y, test_seq = self.prepare_data(self.test_set)
+        train_x, train_y, train_seq, train_se = self.prepare_data(self.train_set, self.origin_train_set)
+        dev_x, dev_y, dev_seq, dev_se = self.prepare_data(self.dev_set, self.origin_dev_set)
+        test_x, test_y, test_seq, test_se = self.prepare_data(self.test_set, self.origin_test_set)
         print('Prepare Over')
-        test_predict = crf_tf(train_x, train_y, train_seq, dev_x, dev_y, dev_seq, test_x, test_y, test_seq, len(con.CWS_LAB2ID))
+        test_predict = crf_tf(train_x, train_y, train_seq, train_se, dev_x, dev_y, dev_seq, dev_se, test_x, test_y, test_seq, test_se, len(con.CWS_LAB2ID))
         test_predict = test_predict.reshape(-1)
         idx, test_predict_text = 0, []
         for ii in self.origin_test_set:
