@@ -4,11 +4,11 @@ from util import log
 
 
 def cws_scorer(predict: str, goal: str, verbose: bool = True):
-    refs = open(goal,
-                encoding='utf-8').readlines()
-    cads = open(predict, encoding='utf-8').readlines()
-    word_precision, word_recall, word_fmeasure, _, _, _, word_tnr, _ = score(
-        refs, cads, verbose=True)  # this verbose means return more result
+    refs = [ii.strip() for ii in open(goal, encoding='utf-8').readlines()]
+    cads = [ii.strip() for ii in open(predict, encoding='utf-8').readlines()]
+    # this verbose means return more result
+    word_precision, word_recall, word_fmeasure, _, _, _, word_tnr, _ = score(refs, cads, verbose=True, is_cws=True)
+      
     if verbose:
         log(f'|{word_precision * 100:.2f}|{word_recall * 100:.2f}|{word_fmeasure * 100:.2f}|')
         print('Word precision:', word_precision)
