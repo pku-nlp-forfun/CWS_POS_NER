@@ -1,5 +1,6 @@
 from Evaluation.pos_evaluate import score
 from constant import CWS_DATA, POS_DATA
+from util import log
 
 
 def cws_scorer(predict: str, goal: str, verbose: bool = True):
@@ -9,6 +10,7 @@ def cws_scorer(predict: str, goal: str, verbose: bool = True):
     word_precision, word_recall, word_fmeasure, _, _, _, word_tnr, _ = score(
         refs, cads, verbose=True)  # this verbose means return more result
     if verbose:
+        log(f'|{word_precision * 100:.2f}|{word_recall * 100:.2f}|{word_fmeasure * 100:.2f}|')
         print('Word precision:', word_precision)
         print('Word recall:', word_recall)
         print('Word F-measure:', word_fmeasure)
