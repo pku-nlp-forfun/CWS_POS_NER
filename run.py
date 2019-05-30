@@ -11,7 +11,7 @@ def pos_test_by_cws_gold(pos_dict):
     # This shit is insane = =
     # 10<sup>9<> WTF????????? but in POS_DATA['POS'] is correct....zzzz
     # cws_gold = load_cws_result_as_input(CWS_DATA['Test'])
-    cws_gold = load_cws_result_from_pos_as_input(POS_DATA['Test'])
+    cws_gold = load_cws_result_from_pos_as_input(RESULT['CWS'])
     pos_model = POSModel(pos_dict)
     pos_predict = pos_model.predict_all(cws_gold)
     from_pos_list_to_file(pos_predict, RESULT['POS'])
@@ -39,8 +39,8 @@ def main():
 
     # Evaluate
     print('Evaluating...')
-    total_evaluate(POS_DATA['Test'], RESULT['CWS'],
-                   POS_DATA['Test'], RESULT['POS'], verbose=True)
+    total_evaluate(RESULT['CWS'], CWS_DATA['Test_POS'],
+                   RESULT['POS'], POS_DATA['Test'], verbose=True)
 
 
 if __name__ == "__main__":
