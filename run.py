@@ -39,7 +39,7 @@ def main():
 
     # Evaluate
     print('Evaluating...')
-    total_evaluate(CWS_DATA['Test'], CWS_DATA['Test'],
+    total_evaluate(POS_DATA['Test'], RESULT['CWS'],
                    POS_DATA['Test'], RESULT['POS'], verbose=True)
 
 
