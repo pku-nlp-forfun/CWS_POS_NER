@@ -1,7 +1,8 @@
 CWS_DATA = {
     'Train': 'Data/trainset/train_cws.txt',
     'Dev': 'Data/devset/val_cws.txt',
-    'Test': 'Data/testset1/test_cws1.txt'
+    'Test': 'Data/testset1/test_cws1.txt',
+    'Test_POS': 'Data/testset1/test_cws1_1.txt'
 }
 
 POS_DATA = {
