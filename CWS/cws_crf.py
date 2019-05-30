@@ -2,7 +2,7 @@
 # @Author: gunjianpan
 # @Date:   2019-05-28 22:24:44
 # @Last Modified by:   gunjianpan
-# @Last Modified time: 2019-05-30 17:35:25
+# @Last Modified time: 2019-05-30 19:43:28
 
 import constant as con
 import numpy as np
@@ -44,44 +44,31 @@ def evaluation(y: List, y_predict: List, mask, total_label, types: str):
 
     # correct_labels = np.sum((y == y_predict) * mask)
     # accuracy = 100.0 * correct_labels / float(total_label)
-    p, r, macro_f1, micro_f1 = fastF1(y, y_predict)
-    print(f"{types} P: {p:.2f}%, R: {r:.2f}%, Macro_f1: {macro_f1:.2f}%, Micro_f1: {micro_f1:.2f}%")
+    p, r, macro_f1 = fastF1(y, y_predict)
+    print(f"{types} P: {p:.2f}%, R: {r:.2f}%, Macro_f1: {macro_f1:.2f}%")
 
-    return p, r, macro_f1, micro_f1
+    return p, r, macro_f1
 
 
 @jit
 def fastF1(result, predict):
-    ''' multi-class f1 score '''
-    true_total, r_total, p_total, p, r, total_list = 0, 0, 0, 0, 0, []
-    class_num = 2
-
-    for trueValue in range(class_num):
-        trueNum, recallNum, precisionNum = 0, 0, 0
-        for index, values in enumerate(result):
-            if values == trueValue:
-                recallNum += 1
-                if values == predict[index]:
-                    trueNum += 1
-            if predict[index] == trueValue:
-                precisionNum += 1
-        R = trueNum / recallNum if recallNum else 0
-        P = trueNum / precisionNum if precisionNum else 0
-        true_total += trueNum
-        r_total += recallNum
-        p_total += precisionNum
-        p += P
-        r += R
-        f1 = (2 * P * R) / (P + R) if (P + R) else 0
-        total_list.append([P, R, f1])
-    p /= class_num
-    r /= class_num
-    micro_r = true_total / r_total
-    micro_p = true_total / p_total
+    ''' cws f1 score calculate '''
+    recallNum = sum(result)
+    precisionNum = sum(predict)
+    last_result, last_predict, trueNum = 0, 0, 0
+    for ii in range(len(result)):
+        if result[ii] and result[ii] == predict[ii] and last_predict == last_result:
+            trueNum += 1
+        if result[ii]:
+            last_result = ii
+        if predict[ii]:
+            last_predict = ii
+            
+    r = trueNum / recallNum if recallNum else 0
+    p = trueNum / precisionNum if precisionNum else 0
     macro_f1 = (2 * p * r) / (p + r) if (p + r) else 0
-    micro_f1 = (2 * micro_p * micro_r) / (micro_p +
-                                          micro_r) if (micro_p + micro_r) else 0
-    return p * 100, r * 100, macro_f1 * 100, micro_f1 * 100
+
+    return p * 100, r * 100, macro_f1 * 100
 
 
 def crf_tf(train_x: List, train_y: List, train_seq: List,
@@ -138,28 +125,25 @@ def crf_tf(train_x: List, train_y: List, train_seq: List,
 
         log(f'------- {time_str()} -------')
 
-        for i in range(200):
+        for i in range(300):
             train_predict, _ = session.run([train_viterbi_seq, train_op])
             if i % 10 == 0:
                 dev_predict = session.run([dev_viterbi_seq])[0]
                 print(f'------  \033[92m{i} epochs \033[0m -------')
-                train_p, train_r, train_macro_f1, train_micro_f1 = evaluation(
-                    train_y, train_predict, train_mask, train_total, 'Train')
-                dev_p, dev_r, dev_macro_f1, dev_micro_f1 = evaluation(
-                    dev_y, dev_predict, dev_mask, dev_total, 'Dev')
-                log(f'{i}|{train_p:.2f}|{train_r:.2f}|{train_macro_f1:.2f}|{train_micro_f1:.2f}|{dev_p:.2f}|{dev_r:.2f}|{dev_macro_f1:.2f}|{dev_micro_f1:.2f}|')
+                train_p, train_r, train_macro_f1 = evaluation(train_y, train_predict, train_mask, train_total, 'Train')
+                dev_p, dev_r, dev_macro_f1 = evaluation(dev_y, dev_predict, dev_mask, dev_total, 'Dev')
+                log(f'{i}|{train_p:.2f}|{train_r:.2f}|{train_macro_f1:.2f}|{dev_p:.2f}|{dev_r:.2f}|{dev_macro_f1:.2f}|')
                 if dev_macro_f1 > best_dev_acc:
                     best_dev_acc = dev_macro_f1
                     test_predict = session.run([test_viterbi_seq])[0]
                     pickle.dump(test_predict, open(f"{con.RESULT['CWS']}.pkl", 'wb'))
-                    test_p, test_r, test_macro_f1, test_micro_f1 = evaluation(
-                        test_y, test_predict, test_mask, test_total, 'Test')
+                    test_p, test_r, test_macro_f1 = evaluation(test_y, test_predict, test_mask, test_total, 'Test')
                         
         log(f"Best Dev Macro_f1: {best_dev_acc:.2f}%")
-        log(f"Best Test P: {test_p:.2f}%, R: {test_r:.2f}%, Macro_f1: {test_macro_f1:.2f}%, Micro_f1: {test_micro_f1:.2f}%")
+        log(f"Best Test P: {test_p:.2f}%, R: {test_r:.2f}%, Macro_f1: {test_macro_f1:.2f}%")
 
         echo(0, f"Best Dev Macro_f1: {best_dev_acc:.2f}%")
-        echo(0, f"Best Test P: {test_p:.2f}%, R: {test_r:.2f}%, Macro_f1: {test_macro_f1:.2f}%, Micro_f1: {test_micro_f1:.2f}%")
+        echo(0, f"Best Test P: {test_p:.2f}%, R: {test_r:.2f}%, Macro_f1: {test_macro_f1:.2f}%")
         return test_predict
 
 
