@@ -68,6 +68,7 @@ Pure CRF
 
 Bi-LSTM
 
+- [**EricLingRui/NLP-tools**](https://github.com/EricLingRui/NLP-tools)
 - [chantera/blstm-cws](https://github.com/chantera/blstm-cws)
   - [data/download.sh](https://github.com/chantera/blstm-cws/blob/master/data/download.sh)
 - [luozhouyang/deepseg](https://github.com/luozhouyang/deepseg)

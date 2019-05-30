@@ -30,6 +30,8 @@ The following shit in the `testset1/test_pos1.txt` don't exist in `trainset/trai
 | --------- | ------ | -------- |
 | 95.39     | 95.39  | 95.39    |
 
+* [Precision and recall are equal when the size is same](https://stats.stackexchange.com/questions/97412/precision-and-recall-are-equal-when-the-size-is-same)
+
 ## Resources
 
 * [NLP-progress - Part-of-speech tagging](http://nlpprogress.com/english/part-of-speech_tagging.html)
@@ -64,6 +66,10 @@ HMM
 * [pjhanwar/POS-Tagger](https://github.com/pjhanwar/POS-Tagger)
 * [lkmcl37/Chinese-POS-Tagger](https://github.com/lkmcl37/Chinese-POS-Tagger) - Chinese Part-of-Speech Tagger based on HMM and Viterbi Algorithm (Java)
 
+BiLSTM
+
+* [**EricLingRui/NLP-tools**](https://github.com/EricLingRui/NLP-tools)
+
 ### Others
 
 #### Application
@@ -72,3 +78,8 @@ English
 
 * [Parts-of-speech.Info](https://parts-of-speech.info/)
 * [Stanford Log-linear Part-Of-Speech Tagger](https://nlp.stanford.edu/software/tagger.html)
+
+#### Precision and Recall
+
+* [Precision vs Recall](https://towardsdatascience.com/precision-vs-recall-386cf9f89488)
+* [Classification: Precision and Recall](https://developers.google.com/machine-learning/crash-course/classification/precision-and-recall)
