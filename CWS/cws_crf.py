@@ -2,11 +2,15 @@
 # @Author: gunjianpan
 # @Date:   2019-05-28 22:24:44
 # @Last Modified by:   gunjianpan
-# @Last Modified time: 2019-05-30 01:50:27
+# @Last Modified time: 2019-05-30 13:20:43
 
+import constant as con
 import numpy as np
+import pickle
 import tensorflow as tf
+
 from typing import List
+from util import echo, time_str, log
 
 def tf_constant(x:List, y:List, z:List):
     ''' init tf constant params '''
@@ -71,21 +75,26 @@ def crf_tf(train_x: List, train_y: List, train_seq: List,
         dev_mask, dev_total = mask(num_dev_word, dev_seq)
         test_mask, test_total = mask(num_test_word, test_seq)
         best_dev_acc = -1
-        
 
-        for i in range(1000):
+        log(f'------- {time_str()} -------')
+        
+        for i in range(200):
             train_predict, _ = session.run([train_viterbi_seq, train_op])
-            if i % 100 == 0:
+            if i % 10 == 0:
                 dev_predict = session.run([dev_viterbi_seq])[0]
                 print(f'------  \033[92m{i} epochs \033[0m -------')
-                evaluation(train_y, train_predict, train_mask, train_total, 'Train')
+                train_acc = evaluation(train_y, train_predict, train_mask, train_total, 'Train')
                 dev_acc = evaluation(dev_y, dev_predict, dev_mask, dev_total, 'Dev')
+                log(f'{i}|{train_acc:.2f}|{dev_acc:.2f}|')
                 if dev_acc > best_dev_acc:
                     best_dev_acc = dev_acc
                     test_predict = session.run([test_viterbi_seq])[0] 
+                    pickle.dump(test_predict, open(f"{con.RESULT['CWS']}.pkl", 'wb'))
                     test_acc = evaluation(test_y, test_predict, test_mask, test_total, 'Test') 
-        print(f"\033[91mBest Dev Accuracy: {best_dev_acc:.2f}%\033[0m")
-        print(f"\033[91mBest Test Accuracy: {test_acc:.2f}%\033[0m")
+
+        echo(0, f"Best Dev Accuracy: {best_dev_acc:.2f}%")
+        echo(0, f"Best Test Accuracy: {test_acc:.2f}%")
+        return test_predict
 
 
 def test_params(num_seq:int, num_word:int, num_fea:int, num_tag:int):
@@ -105,5 +114,3 @@ if __name__ == "__main__":
     test_x, test_y, test_seq = test_params(10, 30, num_fea, num_tag)
 
     crf_tf(train_x, train_y, train_seq, dev_x, dev_y, dev_seq, test_x, test_y, test_seq, num_tag)
-    
-
