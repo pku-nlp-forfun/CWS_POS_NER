@@ -1,5 +1,5 @@
 # Transfer dataset into traninable format
-from constant import POS_DATA, CWS_DATA
+from constant import POS_DATA, CWS_DATA, Final
 from collections import defaultdict, Counter
 
 
@@ -69,6 +69,11 @@ def get_raw_article_from_cws_data(path: str = CWS_DATA['Train'], output_path: st
             f_out.write(raw_article)
 
     return raw_article
+
+
+def get_raw_article(path: str = Final['RawArticle']):
+    with open(path, 'r') as article:
+        return article.read()
 
 
 if __name__ == "__main__":

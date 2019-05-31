@@ -212,9 +212,9 @@ class POSModel:
         self.__use_rule = use_rule
         self.__test_mode = test_mode
 
-        self.__re_chinese = re.compile("([\u4E00-\u9FD5]+)")
-        self.__re_entire_eng = re.compile('^[a-zA-Z]+$', re.U)
-        self.__re_digit = re.compile("[\.0-9]+%?")  # 87 or 87% or 87.87%
+        self.__re_chinese = re.compile(r"([\u4E00-\u9FD5]+)")
+        self.__re_entire_eng = re.compile(r'^[a-zA-Z]+$', re.U)
+        self.__re_digit = re.compile(r"[\.0-9]+%?")  # 87 or 87% or 87.87%
 
     def __exception_handler(self, not_in_train_word: str):
         flag = 'n'
@@ -229,11 +229,8 @@ class POSModel:
                     flag = 'nr' if random() > 0.5 else 'ns'  # must be a name or a place = =
                 else:
                     flag = 'nx'
-        # end with 状 but not 症状
-        elif len(not_in_train_word) >= 2 and not_in_train_word[-1] == '状' and not_in_train_word[-2:] != '症状':
-            flag = 'b'
-        # end with 性, and not 毒性
-        elif len(not_in_train_word) >= 2 and not_in_train_word[-1] == '性' and (not_in_train_word[-2:] != '毒性' and len(not_in_train_word) == 2):
+        # end with 状 or 性
+        elif len(not_in_train_word) >= 2 and not_in_train_word[-1] in ('状', '性'):
             flag = 'b'
 
         return flag

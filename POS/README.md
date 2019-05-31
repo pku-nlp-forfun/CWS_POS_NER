@@ -28,7 +28,7 @@ Mayo, Clinic, 1950, 年间, Minnesota, 州, Olmsted, 郡, 0.26, 但至, 0.65%, �
 
 | Precision | Recall | F1 Score |
 | --------- | ------ | -------- |
-| 95.83     | 95.83  | 95.83    |
+| 95.86     | 95.86  | 95.86    |
 
 * [Precision and recall are equal when the size is same](https://stats.stackexchange.com/questions/97412/precision-and-recall-are-equal-when-the-size-is-same)
 
