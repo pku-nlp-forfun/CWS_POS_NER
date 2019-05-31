@@ -16,6 +16,12 @@ RESULT = {
     'POS': 'Result/pos_predict.txt'
 }
 
+Final = {
+    'RawArticle': 'Data/testset2/test2.txt',
+    'CWSResult': 'Result/test_cws2.txt',
+    'POSResult': 'Result/test_pos2.txt',
+}
+
 CWS_LAB2ID = {
     'B': 0,
     'M': 1,
