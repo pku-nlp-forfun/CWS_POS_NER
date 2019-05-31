@@ -147,11 +147,14 @@ class BiLSTM_CRF_Model():
 class BiLSTMTrain(object):
     ''' bi lstm train '''
      
-    def __init__(self, data_train:List, data_dev:List, data_test:List, model:BiLSTM_CRF_Model):
+    def __init__(self, data_train:List, data_dev:List, data_test:List, model:BiLSTM_CRF_Model, data_predict:List=None):
         self.data_train = data_train
         self.data_dev = data_dev
         self.data_test = data_test
         self.model = model
+        if not data_predict is None:
+            self.do_predict = True
+            self.data_predict = data_predict
 
     def train(self, max_epoch:int, max_max_epoch:int, tr_batch_size:int, display_num:int=5):
         config = tf.ConfigProto()
@@ -214,6 +217,7 @@ class BiLSTMTrain(object):
                 log(f'{epoch}|{train_p:.2f}|{train_r:.2f}|{train_macro_f1:.2f}|{dev_p:.2f}|{dev_r:.2f}|{dev_macro_f1:.2f}|')
                 if dev_macro_f1 > best_dev_acc:
                     test_p, test_r, test_macro_f1, predict = self.test_epoch(self.data_test, sess, 'Test')
+                    _ = self.test_epoch(self.data_predict, sess, 'Predict') 
                     best_dev_acc = dev_macro_f1
 
             echo(1, f'Training {self.data_train[1].shape[0]}, loss={mean_loss:g} ')
@@ -255,9 +259,28 @@ class BiLSTMTrain(object):
                 predict.append(viterbi_sequence)
         if types == 'Test':
             pickle.dump(predict, open(f"{con.RESULT['CWS']}.pkl", 'wb'))
+        if types == 'Predict':
+            pickle.dump(predict, open(f"{con.RESULT['CWS']}_predict.pkl", 'wb'))
+            self.load_text(predict)
                   
         p, r, macro_f1 = evaluation(_y, predict, dataset[2], types)
         return p, r, macro_f1, predict
+
+        def load_text(self, predict:List):
+            ''' load text '''
+
+            predict = sum([ii[:self.data_predict[2][jj]] for jj, ii in enumerate(predict)], [])
+
+            idx, test_predict_text = 0, []
+            for ii in self.data_predict[3]:
+                temp_len = len(ii)
+                temp_tag = predict[idx: idx + temp_len]
+                temp_text = ''.join([f'{kk[0]}{"" if temp_tag[jj] < 2 else " "}' for jj, kk in enumerate(ii)]).strip()
+                test_predict_text.append(temp_text)
+                idx += temp_len
+            
+            with open(f"{con.RESULT['CWS']}_{time_str()}", 'w') as f:
+                f.write('\n'.join(test_predict_text))
 
 def test_params(num_seq: int, num_word: int, word_size: int, num_tag: int):
     x = np.random.randint(word_size, size=[num_seq, num_word]).astype(np.int32)
