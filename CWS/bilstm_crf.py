@@ -275,21 +275,21 @@ class BiLSTMTrain(object):
         p, r, macro_f1 = evaluation(_y, predict, dataset[2], types)
         return p, r, macro_f1, predict
 
-        def load_text(self, predict:List):
-            ''' load text '''
+    def load_text(self, predict:List):
+        ''' load text '''
 
-            predict = sum([ii[:self.data_predict[2][jj]] for jj, ii in enumerate(predict)], [])
+        predict = sum([ii[:self.data_predict[2][jj]] for jj, ii in enumerate(predict)], [])
 
-            idx, test_predict_text = 0, []
-            for ii in self.data_predict[3]:
-                temp_len = len(ii)
-                temp_tag = predict[idx: idx + temp_len]
-                temp_text = ''.join([f'{kk[0]}{"" if temp_tag[jj] < 2 else " "}' for jj, kk in enumerate(ii)]).strip()
-                test_predict_text.append(temp_text)
-                idx += temp_len
-            
-            with open(f"{con.RESULT['CWS']}_{time_str()}", 'w') as f:
-                f.write('\n'.join(test_predict_text))
+        idx, test_predict_text = 0, []
+        for ii in self.data_predict[3]:
+            temp_len = len(ii)
+            temp_tag = predict[idx: idx + temp_len]
+            temp_text = ''.join([f'{kk[0]}{"" if temp_tag[jj] < 2 else " "}' for jj, kk in enumerate(ii)]).strip()
+            test_predict_text.append(temp_text)
+            idx += temp_len
+        
+        with open(f"{con.RESULT['CWS']}_{time_str()}", 'w') as f:
+            f.write('\n'.join(test_predict_text))
 
     def predict(self):
         config = tf.ConfigProto()
