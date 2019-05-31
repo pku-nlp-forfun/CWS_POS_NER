@@ -13,7 +13,10 @@ POS_DATA = {
 
 RESULT = {
     'CWS': 'Result/cws_predict.txt',
-    'POS': 'Result/pos_predict.txt'
+    'POS': 'Result/pos_predict.txt',
+    'POSTrain': 'Result/pos_train_predict.txt',
+    'POSTest': 'Result/pos_test_predict.txt',
+    'POSDev': 'Result/pos_dev_predict.txt',
 }
 
 Final = {
