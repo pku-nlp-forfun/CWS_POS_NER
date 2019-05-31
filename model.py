@@ -5,6 +5,7 @@ import re
 from random import random
 
 from CWS.cws_crf import crf_tf
+from CWS.bilstm_crf import BiLSTMTrain, BiLSTM_CRF_Model
 from collections import Counter
 from enum import Enum
 from numba import jit
@@ -20,19 +21,41 @@ class EMBED_TYPE(Enum):
     TF_IDF = 1
     FAST_TEXT = 2
 
+class CWS_MODEL(Enum):
+    CRF = 0
+    BILSTM = 1
 
 embed_type = EMBED_TYPE.FAST_TEXT
-
 
 class CWSModel:
     ''' CRF for word segment '''
 
-    def __init__(self, train_set: List, dev_set: List, test_set: List):
+    def __init__(self, train_set: List, dev_set: List, test_set: List, cws_model: CWS_MODEL = CWS_MODEL.BILSTM):
         self.MAX_LEN = 0
         self.origin_train_set = train_set
         self.origin_dev_set = dev_set
         self.origin_test_set = test_set
-        self.statistical_data(train_set, dev_set, test_set)
+        self.cws_model = cws_model
+        if cws_model == CWS_MODEL.CRF:
+            self.statistical_data(train_set, dev_set, test_set)
+        elif cws_model == CWS_MODEL.BILSTM:
+            self.load_word(train_set, dev_set, test_set)
+
+
+    def load_word(self, train_set: List, dev_set: List, test_set: List):
+        ''' load word '''
+        total_set = [*train_set, *dev_set, *test_set]
+        word_list = sum([[jj[0] for jj in ii] for ii in total_set], [])
+        word_set = ['[PAD]', *list(set(word_list))]
+        echo(1, len(word_list))
+        word2id = {jj: ii for ii, jj in enumerate(word_set)}
+        self.word2id = word2id
+        MAX_LEN = max([len(ii) for ii in total_set])
+        self.train_set = self.load_word_once(train_set, MAX_LEN)
+        self.dev_set = self.load_word_once(dev_set, MAX_LEN)
+        self.test_set = self.load_word_once(test_set, MAX_LEN)
+        self.MAX_LEN = MAX_LEN
+
 
     def statistical_data(self, train_set: List, dev_set: List, test_set: List, do_reshape: bool = True):
         ''' statistical data '''
@@ -61,6 +84,14 @@ class CWSModel:
             self.train_set = self.reshape_data(train_set)
             self.dev_set = self.reshape_data(dev_set)
             self.test_set = self.reshape_data(test_set)
+    
+    def load_word_once(self, origin_set: List, MAX_LEN: int) -> List:
+        ''' load word once '''
+        data_set = [[self.word2id[jj[0]] for jj in ii] + [0] * (MAX_LEN - len(ii))  for ii in origin_set]
+        label = [[con.CWS_LAB2ID[jj[1]] for jj in ii] + [0] * (MAX_LEN - len(ii))  for ii in origin_set]
+        seq = [len(ii) for ii in origin_set]
+        echo(1, np.array(data_set).shape, np.array(seq).shape)
+        return [np.array(data_set), np.array(label), np.array(seq)]
 
     def reshape_data(self, origin_set: List, MAX_LEN: int = 200) -> List:
         ''' reshape data '''
@@ -182,6 +213,27 @@ class CWSModel:
         return embed
 
     def run_model(self):
+        ''' run model schedule '''
+        if self.cws_model == CWS_MODEL.CRF:
+            self.run_crf()
+        elif self.cws_model == CWS_MODEL.BILSTM:
+            self.run_bilstm_crf()
+
+    def run_bilstm_crf(self):
+        ''' run bilstm crf '''
+        model = BiLSTM_CRF_Model(max_len=self.MAX_LEN, 
+                                vocab_size=len(self.word2id), 
+                                num_tag=len(con.CWS_LAB2ID), 
+                                model_save_path='./checkpoint/checkpoint', 
+                                embed_size=256,  
+                                hs=512)
+        train = BiLSTMTrain(self.train_set, self.dev_set, self.test_set, model)
+        predict = train.train(100, 200, 64)
+        predict = sum([ii[:self.test_set[2][jj]] for jj, ii in enumerate(predict)], [])
+        self.load_result(predict)
+
+
+    def run_crf(self):
         ''' run crf model '''
         train_x, train_y, train_seq, train_se = self.prepare_data(
             self.train_set, self.origin_train_set)
@@ -193,6 +245,10 @@ class CWSModel:
         test_predict = crf_tf(train_x, train_y, train_seq, train_se, dev_x, dev_y,
                               dev_seq, dev_se, test_x, test_y, test_seq, test_se, len(con.CWS_LAB2ID))
         test_predict = test_predict.reshape(-1)
+        self.load_result(test_predict)
+    
+    def load_result(self, test_predict:List):
+        ''' load result '''
         idx, test_predict_text = 0, []
         for ii in self.origin_test_set:
             temp_len = len(ii)
