@@ -1,4 +1,3 @@
-# from model import POSModel
 from constant import POS_DATA
 from dataset import processing_pos_data
 from evaluate import pos_scorer
@@ -16,64 +15,6 @@ sys.path.append(os.getcwd())
 
 from POS.pos_data import load_cws_result_as_input
 
-
-class POSModel:
-    def __init__(self, pos_counter_dict: dict, use_rule: bool = True, test_mode: bool = False):
-        self.knowledge_graph = pos_counter_dict
-        self.__use_rule = use_rule
-        self.__test_mode = test_mode
-
-        self.__re_chinese = re.compile(r"([\u4E00-\u9FD5]+)")
-        self.__re_entire_eng = re.compile(r'^[a-zA-Z]+$', re.U)
-        self.__re_digit = re.compile(r"[\.0-9]+%?")  # 87 or 87% or 87.87%
-
-    def __exception_handler(self, not_in_train_word: str):
-        flag = 'n'
-
-        if not self.__re_chinese.match(not_in_train_word):  # not chinese
-            if self.__re_digit.match(not_in_train_word):  # digit
-                flag = 'm'
-            elif self.__re_entire_eng.match(not_in_train_word):  # english
-                if not_in_train_word in ('kg', 'kPa', 'd', 'm', 'mg', 'mm', 'L', 'mmol', 'mol', 'mmHg', 'ml', 'pH', 'ppm', 'cm', 'cmH', 'g', 'km', 'sec'):
-                    flag = 'q'  # a unit
-                elif not_in_train_word[0].isupper() and not_in_train_word[1:].islower():
-                    flag = 'nr' if random() > 0.5 else 'ns'  # must be a name or a place = =
-                else:
-                    flag = 'nx'
-        # end with 状 or 性
-        elif len(not_in_train_word) >= 2 and not_in_train_word[-1] in ('状', '性'):
-            flag = 'b'
-
-        return flag
-
-    def predict_pos(self, word: str) -> str:
-        if word in ('', '\n'):
-            return ''
-        try:
-            return self.knowledge_graph[word].most_common()[0][0]
-        except:  # every word not in the training set we give it Noun = =
-            flag = 'n'
-            if self.__use_rule:
-                flag = self.__exception_handler(word)
-            if self.__test_mode:
-                print((word, flag), end=', ')
-            return flag
-
-    def predict_list(self, words: list) -> list:
-        result = []
-        for word in words:
-            pos = self.predict_pos(word)
-            if pos:
-                result.append(word + '/' + pos)
-            else:
-                result.append(word)
-        return result
-
-    def predict_all(self, predict_sentence_list: list):
-        result = []
-        for sentence_list in predict_sentence_list:
-            result.append(self.predict_list(sentence_list))
-        return result
 
 def tf_constant(x: List, y: List, z: List):
     ''' init tf constant params '''
@@ -213,11 +154,12 @@ class BiLSTM_CRF_Model():
 class BiLSTMTrain(object):
     ''' bi lstm train '''
      
-    def __init__(self, data_train:List, data_dev:List, data_test:List, model:BiLSTM_CRF_Model, data_predict:List=None):
+    def __init__(self, data_train:List, data_dev:List, data_test:List, model:BiLSTM_CRF_Model, data_predict:List=None, POSModel=None):
         self.data_train = data_train
         self.data_dev = data_dev
         self.data_test = data_test
         self.model = model
+        self.POSModel = POSModel
         if not data_predict is None:
             self.do_predict = True
             self.data_predict = data_predict
@@ -336,18 +278,18 @@ class BiLSTMTrain(object):
             pickle.dump(predict, open(f"{con.RESULT['CWS']}.pkl", 'wb'))
         if types == 'Predict':
             pickle.dump(predict, open(f"{con.RESULT['CWS']}_predict.pkl", 'wb'))
-        self.load_text(predict, types)
+        self.load_text(dataset, predict, types)
                   
         p, r, macro_f1 = evaluation(_y, predict, dataset[2], types)
         return p, r, macro_f1, predict
 
-    def load_text(self, predict:List, types:str):
+    def load_text(self, data_set:List, predict:List, types:str):
         ''' load text '''
 
-        predict = sum([ii[:self.data_predict[2][jj]] for jj, ii in enumerate(predict)], [])
+        predict = sum([ii[:data_set[2][jj]] for jj, ii in enumerate(predict)], [])
 
         idx, test_predict_text = 0, []
-        for ii in self.data_predict[3]:
+        for ii in data_set[3]:
             temp_len = len(ii)
             temp_tag = predict[idx: idx + temp_len]
             temp_text = ''.join([f'{kk[0]}{"" if temp_tag[jj] < 2 else " "}' for jj, kk in enumerate(ii)]).strip()
@@ -361,7 +303,7 @@ class BiLSTMTrain(object):
             return
         cws_intput = load_cws_result_as_input(output_path)
         _, pos_dict = processing_pos_data(con.POS_DATA['Train'])
-        pos_model = POSModel(pos_dict, use_rule=True)
+        pos_model = self.POSModel(pos_dict, use_rule=True)
         pos_predict = pos_model.predict_all(cws_intput)
         tag_precision, tag_recall, tag_fmeasure, tag_tnr = pos_scorer(pos_predict, con.POS_DATA[types], verbose=True)
 
