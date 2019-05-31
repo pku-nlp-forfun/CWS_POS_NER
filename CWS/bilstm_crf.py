@@ -198,15 +198,20 @@ class BiLSTMTrain(object):
                     if dev_macro_f1 > best_dev_acc:
                         test_p, test_r, test_macro_f1, predict = self.test_epoch(self.data_test, sess, 'Test')
                         best_dev_acc = dev_macro_f1
+                        log(f'{epoch}-{batch}|{train_p:.2f}|{train_r:.2f}|{train_macro_f1:.2f}|{dev_p:.2f}|{dev_r:.2f}|{dev_macro_f1:.2f}|{test_p:.2f}|{test_r:.2f}|{test_macro_f1:.2f}|')
+                    else:
+                        log(f'{epoch}-{batch}|{train_p:.2f}|{train_r:.2f}|{train_macro_f1:.2f}|{dev_p:.2f}|{dev_r:.2f}|{dev_macro_f1:.2f}|')
+
                     echo(f'training loss={show_loss / display_batch}')
                     show_loss = 0.0
             mean_loss = _losstotal / tr_batch_num
-            if (epoch + 1) % 20 == 0:
+            if not (epoch + 1) % 1:
                 save_path = saver.save(sess, self.model.model_save_path, global_step=(epoch + 1))
                 print('the save path is ', save_path)
-            if epoch % 10 == 1:
+            if epoch % 1:
                 train_p, train_r, train_macro_f1, _ = self.test_epoch(self.data_train, sess, 'Train')
                 dev_p, dev_r, dev_macro_f1, _ = self.test_epoch(self.data_dev, sess, 'Dev') 
+                log(f'{epoch}|{train_p:.2f}|{train_r:.2f}|{train_macro_f1:.2f}|{dev_p:.2f}|{dev_r:.2f}|{dev_macro_f1:.2f}|')
                 if dev_macro_f1 > best_dev_acc:
                     test_p, test_r, test_macro_f1, predict = self.test_epoch(self.data_test, sess, 'Test')
                     best_dev_acc = dev_macro_f1
