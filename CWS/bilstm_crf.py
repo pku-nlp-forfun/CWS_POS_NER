@@ -1,3 +1,7 @@
+# from model import POSModel
+from constant import POS_DATA
+from dataset import processing_pos_data
+from evaluate import pos_scorer
 import constant as con
 import numpy as np
 import pickle
@@ -7,13 +11,69 @@ import time
 from numba import jit
 from typing import List
 from util import echo, time_str, log
+import sys, os
+sys.path.append(os.getcwd())
 
-from model import POSModel
 from POS.pos_data import load_cws_result_as_input
-from constant import POS_DATA
-from dataset import processing_pos_data
-from evaluate import pos_scorer
 
+
+class POSModel:
+    def __init__(self, pos_counter_dict: dict, use_rule: bool = True, test_mode: bool = False):
+        self.knowledge_graph = pos_counter_dict
+        self.__use_rule = use_rule
+        self.__test_mode = test_mode
+
+        self.__re_chinese = re.compile(r"([\u4E00-\u9FD5]+)")
+        self.__re_entire_eng = re.compile(r'^[a-zA-Z]+$', re.U)
+        self.__re_digit = re.compile(r"[\.0-9]+%?")  # 87 or 87% or 87.87%
+
+    def __exception_handler(self, not_in_train_word: str):
+        flag = 'n'
+
+        if not self.__re_chinese.match(not_in_train_word):  # not chinese
+            if self.__re_digit.match(not_in_train_word):  # digit
+                flag = 'm'
+            elif self.__re_entire_eng.match(not_in_train_word):  # english
+                if not_in_train_word in ('kg', 'kPa', 'd', 'm', 'mg', 'mm', 'L', 'mmol', 'mol', 'mmHg', 'ml', 'pH', 'ppm', 'cm', 'cmH', 'g', 'km', 'sec'):
+                    flag = 'q'  # a unit
+                elif not_in_train_word[0].isupper() and not_in_train_word[1:].islower():
+                    flag = 'nr' if random() > 0.5 else 'ns'  # must be a name or a place = =
+                else:
+                    flag = 'nx'
+        # end with 状 or 性
+        elif len(not_in_train_word) >= 2 and not_in_train_word[-1] in ('状', '性'):
+            flag = 'b'
+
+        return flag
+
+    def predict_pos(self, word: str) -> str:
+        if word in ('', '\n'):
+            return ''
+        try:
+            return self.knowledge_graph[word].most_common()[0][0]
+        except:  # every word not in the training set we give it Noun = =
+            flag = 'n'
+            if self.__use_rule:
+                flag = self.__exception_handler(word)
+            if self.__test_mode:
+                print((word, flag), end=', ')
+            return flag
+
+    def predict_list(self, words: list) -> list:
+        result = []
+        for word in words:
+            pos = self.predict_pos(word)
+            if pos:
+                result.append(word + '/' + pos)
+            else:
+                result.append(word)
+        return result
+
+    def predict_all(self, predict_sentence_list: list):
+        result = []
+        for sentence_list in predict_sentence_list:
+            result.append(self.predict_list(sentence_list))
+        return result
 
 def tf_constant(x: List, y: List, z: List):
     ''' init tf constant params '''
