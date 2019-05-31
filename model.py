@@ -11,13 +11,17 @@ from numba import jit
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.pipeline import make_pipeline
-from typing import List
+from typing import List, Dict
 from util import echo
 
 
 class EMBED_TYPE(Enum):
     ONE_HOT = 0
     TF_IDF = 1
+    FAST_TEXT = 2
+
+
+embed_type = EMBED_TYPE.FAST_TEXT
 
 
 class CWSModel:
@@ -32,7 +36,11 @@ class CWSModel:
 
     def statistical_data(self, train_set: List, dev_set: List, test_set: List, do_reshape: bool = True):
         ''' statistical data '''
-        word_list = sum([[jj[0] for jj in ii] for ii in train_set], [])
+        if embed_type == EMBED_TYPE.FAST_TEXT:
+            pre_set = [*train_set, *test_set, *dev_set]
+        else:
+            pre_set = train_set
+        word_list = sum([[jj[0] for jj in ii] for ii in pre_set], [])
         word_set = ['[OOV]', *list(set(word_list))]
         echo(1, len(word_list))
         word2id = {jj: ii for ii, jj in enumerate(word_set)}
@@ -69,7 +77,7 @@ class CWSModel:
                             for ii, jj in enumerate(reshape_data)]
         return reshape_data
 
-    def prepare_data(self, now_set: List, origin_set: List, embed_type: EMBED_TYPE = EMBED_TYPE.TF_IDF) -> (List, List, List):
+    def prepare_data(self, now_set: List, origin_set: List) -> (List, List, List):
         ''' prepare_data '''
         MAX_LEN = max([len(ii) for ii in now_set])
         print(f'MAX_LEN: {MAX_LEN}')
@@ -81,6 +89,9 @@ class CWSModel:
             x = self.one_hot(x)
         elif embed_type == EMBED_TYPE.TF_IDF:
             x = self.tf_idf(x, seq)
+        elif embed_type == EMBED_TYPE.FAST_TEXT:
+            x = self.char_embed(x)
+
         return x, y, seq_len, seq
 
     def pad_pattern(self, origin_set: List, idx: int, MAX_LEN: int) -> List:
@@ -113,6 +124,8 @@ class CWSModel:
         transformed = np.array(data_transformer.fit_transform(
             n_gram_dict).todense(), dtype=np.float16)
         echo(1, 'Tf idf Over')
+        for ii in n_gram_dict[0].keys():
+            echo(0, transformed[0][ii])
         return transformed.reshape([num_seq, num_word, num_fea])
 
     @jit
@@ -140,8 +153,33 @@ class CWSModel:
         for ii in no_exist_word:
             n_gram_dict[-1][ii] = 0
 
-        echo(1, 'no exist Over')
+        echo(1, len(no_exist_word), 'no exist Over')
         return n_gram_dict
+
+    def char_embed(self, word_set: List):
+        ''' char embed '''
+        if embed_type == EMBED_TYPE.FAST_TEXT:
+            embed_path = 'embedding/gigaword_chn.all.a2b.uni.ite50.vec'
+        embed = self.load_embedding(embed_path)
+        echo(1, 'len of embed', len(embed))
+        word_set = np.array(word_set)
+        num_fea = len(list(embed.values())[0])
+        num_seq, num_word = word_set.shape
+        echo(0, num_seq, num_word, num_fea)
+        word_set = word_set.reshape(-1)
+        result_set = np.array([embed[ii] if ii in embed else np.zeros(
+            num_fea) for ii in word_set])
+        return result_set.reshape([num_seq, num_word, num_fea])
+
+    def load_embedding(self, data_path: str) -> Dict[str, List[float]]:
+        ''' load embedding '''
+        with open(data_path) as f:
+            origin_embed = [ii.strip() for ii in f.readlines()]
+        origin_embed = [ii for ii in origin_embed if ii.split(' ')[
+            0] in self.word2id]
+        embed = {self.word2id[ii.split(' ')[0]]: np.array(
+            ii.split(' ')[1:]).astype(np.float16) for ii in origin_embed}
+        return embed
 
     def run_model(self):
         ''' run crf model '''
@@ -200,7 +238,7 @@ class POSModel:
 
         return flag
 
-    def predict_pos(self, word: str)->str:
+    def predict_pos(self, word: str) -> str:
         if word in ('', '\n'):
             return ''
         try:
@@ -213,7 +251,7 @@ class POSModel:
                 print((word, flag), end=', ')
             return flag
 
-    def predict_list(self, words: list)->list:
+    def predict_list(self, words: list) -> list:
         result = []
         for word in words:
             pos = self.predict_pos(word)
