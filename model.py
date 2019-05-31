@@ -3,7 +3,9 @@ import numpy as np
 import pickle
 
 from CWS.cws_crf import crf_tf
+from collections import Counter
 from enum import Enum
+from numba import jit
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.pipeline import make_pipeline
@@ -66,16 +68,18 @@ class CWSModel:
                             for ii, jj in enumerate(reshape_data)]
         return reshape_data
 
-    def prepare_data(self, now_set: List, origin_set:List, embed_type: EMBED_TYPE = EMBED_TYPE.ONE_HOT) -> (List, List, List):
+    def prepare_data(self, now_set: List, origin_set:List, embed_type: EMBED_TYPE = EMBED_TYPE.TF_IDF) -> (List, List, List):
         ''' prepare_data '''
         MAX_LEN = max([len(ii) for ii in now_set])
-        print(f'MAX_LEN{MAX_LEN}')
+        print(f'MAX_LEN: {MAX_LEN}')
         seq_len = [len(ii) for ii in now_set]
         seq = [len(ii) for ii in origin_set]
         x = self.pad_pattern(now_set, 0, MAX_LEN)
         y = self.pad_pattern(now_set, 1, MAX_LEN)
         if embed_type == EMBED_TYPE.ONE_HOT:
             x = self.one_hot(x)
+        elif embed_type == EMBED_TYPE.TF_IDF:
+            x = self.tf_idf(x, seq)
         return x, y, seq_len, seq
 
     def pad_pattern(self, origin_set: List, idx: int, MAX_LEN: int) -> List:
@@ -89,17 +93,53 @@ class CWSModel:
         num_seq, num_word = word_set.shape
         echo(0, num_seq, num_word, num_fea)
 
-        return np.squeeze(np.eye(num_fea)[word_set.reshape(-1)]).reshape([num_seq, num_word, num_fea])
+        return np.squeeze(np.eye(num_fea)[word_set.reshape(-1)]).reshape([num_seq, num_word, num_fea]).astype(np.int16)
 
-    def tf_idf(self, word_set:List):
+    def tf_idf(self, word_set:List, seq: List, n_gram: int=4):
         ''' tf-idf embed'''
+
         word_set = np.array(word_set)
         num_fea = len(self.word2id)
         num_seq, num_word = word_set.shape
         echo(0, num_seq, num_word, num_fea)
+        origin_set_one = word_set.reshape(-1)
+        
+        n_gram_dict = self.prepare_n_gram(origin_set_one, seq, n_gram)
+        n_gram_dict += [{}] * (num_seq * num_word - len(n_gram_dict)) 
+
         to_pipeline = [DictVectorizer(), TfidfTransformer()]
         data_transformer = make_pipeline(*to_pipeline)
-        transformed = data_transformer.fit_transform(word_set.reshape(-1)).todense()
+        transformed = np.array(data_transformer.fit_transform(n_gram_dict).todense(), dtype=np.float16)
+        echo(1, 'Tf idf Over')
+        return transformed.reshape([num_seq, num_word, num_fea])
+    
+    @jit
+    def prepare_n_gram(self, origin_set_one:List, seq:List, n_gram:int=4):
+        ''' prepare n gram'''
+        idx, origin_set, n_gram_dict, exist_word, no_exist_word = 0, [], [], {}, []
+        for ii in seq:
+            origin_set.append(list(origin_set_one[idx:idx+ii]))
+            idx += ii
+        echo(1, 'Seq Length Over')
+        for ii in origin_set:
+            for jj, _ in enumerate(ii):
+                t_seq_len = len(ii)
+                begin_idx = max(0, jj - n_gram)
+                end_idx = min(t_seq_len, jj + n_gram)
+                n_gram_word = ii[begin_idx:end_idx]
+                n_gram_count = dict(Counter(n_gram_word))
+                n_gram_dict.append(n_gram_count)
+                for kk, mm in n_gram_count.items():
+                    exist_word[kk] = mm
+        echo(1, 'n_gram Over')
+        for ii in self.word2id.values():
+            if ii not in exist_word:
+                no_exist_word.append(ii)
+        for ii in no_exist_word:
+            n_gram_dict[-1][ii] = 0
+
+        echo(1, 'no exist Over')
+        return n_gram_dict
 
     def run_model(self):
         ''' run crf model '''
