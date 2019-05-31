@@ -30,21 +30,23 @@ embed_type = EMBED_TYPE.FAST_TEXT
 class CWSModel:
     ''' CRF for word segment '''
 
-    def __init__(self, train_set: List, dev_set: List, test_set: List, cws_model: CWS_MODEL = CWS_MODEL.BILSTM):
+    def __init__(self, train_set: List, dev_set: List, test_set: List, predict_set:List=None, cws_model: CWS_MODEL = CWS_MODEL.BILSTM):
         self.MAX_LEN = 0
         self.origin_train_set = train_set
         self.origin_dev_set = dev_set
         self.origin_test_set = test_set
         self.cws_model = cws_model
+        if not predict_set is None:
+            self.origin_predict_set = predict_set
         if cws_model == CWS_MODEL.CRF:
             self.statistical_data(train_set, dev_set, test_set)
         elif cws_model == CWS_MODEL.BILSTM:
-            self.load_word(train_set, dev_set, test_set)
+            self.load_word(train_set, dev_set, test_set, predict_set)
 
 
-    def load_word(self, train_set: List, dev_set: List, test_set: List):
+    def load_word(self, train_set: List, dev_set: List, test_set: List, predict_set:List):
         ''' load word '''
-        total_set = [*train_set, *dev_set, *test_set]
+        total_set = [*train_set, *dev_set, *test_set, *predict_set]
         word_list = sum([[jj[0] for jj in ii] for ii in total_set], [])
         word_set = ['[PAD]', *list(set(word_list))]
         echo(1, len(word_list))
@@ -54,6 +56,7 @@ class CWSModel:
         self.train_set = self.load_word_once(train_set, MAX_LEN)
         self.dev_set = self.load_word_once(dev_set, MAX_LEN)
         self.test_set = self.load_word_once(test_set, MAX_LEN)
+        self.predict_set = [*self.load_word_once(predict_set, MAX_LEN), self.origin_predict_set]
         self.MAX_LEN = MAX_LEN
 
 
@@ -227,7 +230,7 @@ class CWSModel:
                                 model_save_path='./checkpoint/checkpoint', 
                                 embed_size=256,  
                                 hs=512)
-        train = BiLSTMTrain(self.train_set, self.dev_set, self.test_set, model)
+        train = BiLSTMTrain(self.train_set, self.dev_set, self.test_set, model, self.predict_set)
         predict = train.train(100, 200, 64)
         predict = sum([ii[:self.test_set[2][jj]] for jj, ii in enumerate(predict)], [])
         self.load_result(predict)
