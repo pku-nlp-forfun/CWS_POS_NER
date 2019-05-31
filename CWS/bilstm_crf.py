@@ -8,6 +8,12 @@ from numba import jit
 from typing import List
 from util import echo, time_str, log
 
+from model import POSModel
+from POS.pos_data import load_cws_result_as_input
+from constant import POS_DATA
+from dataset import processing_pos_data
+from evaluate import pos_scorer
+
 
 def tf_constant(x: List, y: List, z: List):
     ''' init tf constant params '''
@@ -270,12 +276,12 @@ class BiLSTMTrain(object):
             pickle.dump(predict, open(f"{con.RESULT['CWS']}.pkl", 'wb'))
         if types == 'Predict':
             pickle.dump(predict, open(f"{con.RESULT['CWS']}_predict.pkl", 'wb'))
-            self.load_text(predict)
+        self.load_text(predict, types)
                   
         p, r, macro_f1 = evaluation(_y, predict, dataset[2], types)
         return p, r, macro_f1, predict
 
-    def load_text(self, predict:List):
+    def load_text(self, predict:List, types:str):
         ''' load text '''
 
         predict = sum([ii[:self.data_predict[2][jj]] for jj, ii in enumerate(predict)], [])
@@ -287,9 +293,17 @@ class BiLSTMTrain(object):
             temp_text = ''.join([f'{kk[0]}{"" if temp_tag[jj] < 2 else " "}' for jj, kk in enumerate(ii)]).strip()
             test_predict_text.append(temp_text)
             idx += temp_len
+        output_path = f"{con.RESULT['CWS']}_{time_str()}"
         
-        with open(f"{con.RESULT['CWS']}_{time_str()}", 'w') as f:
+        with open(output_path, 'w') as f:
             f.write('\n'.join(test_predict_text))
+        if types == 'Predict':
+            return
+        cws_intput = load_cws_result_as_input(output_path)
+        _, pos_dict = processing_pos_data(con.POS_DATA['Train'])
+        pos_model = POSModel(pos_dict, use_rule=True)
+        pos_predict = pos_model.predict_all(cws_intput)
+        tag_precision, tag_recall, tag_fmeasure, tag_tnr = pos_scorer(pos_predict, con.POS_DATA[types], verbose=True)
 
     def predict(self):
         config = tf.ConfigProto()

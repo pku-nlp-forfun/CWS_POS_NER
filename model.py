@@ -58,8 +58,7 @@ class CWSModel:
         self.train_set = self.load_word_once(train_set, MAX_LEN)
         self.dev_set = self.load_word_once(dev_set, MAX_LEN)
         self.test_set = self.load_word_once(test_set, MAX_LEN)
-        self.predict_set = [
-            *self.load_word_once(predict_set, MAX_LEN), self.origin_predict_set]
+        self.predict_set = *self.load_word_once(predict_set, MAX_LEN)
         self.MAX_LEN = MAX_LEN
 
     def statistical_data(self, train_set: List, dev_set: List, test_set: List, do_reshape: bool = True):
@@ -98,7 +97,7 @@ class CWSModel:
                  [0] * (MAX_LEN - len(ii)) for ii in origin_set]
         seq = [len(ii) for ii in origin_set]
         echo(1, np.array(data_set).shape, np.array(seq).shape)
-        return [np.array(data_set), np.array(label), np.array(seq)]
+        return [np.array(data_set), np.array(label), np.array(seq), origin_set]
 
     def reshape_data(self, origin_set: List, MAX_LEN: int = 200) -> List:
         ''' reshape data '''
@@ -236,10 +235,11 @@ class CWSModel:
                                  hs=512)
         train = BiLSTMTrain(self.train_set, self.dev_set,
                             self.test_set, model, self.predict_set)
-        train.predict()
-        # predict = train.train(100, 200, 64)
-        # predict = sum([ii[:self.test_set[2][jj]] for jj, ii in enumerate(predict)], [])
-        # self.load_result(predict)
+        # train.predict()
+        predict = train.train(100, 200, 64)
+        predict = sum([ii[:self.test_set[2][jj]]
+                       for jj, ii in enumerate(predict)], [])
+        self.load_result(predict)
 
     def run_crf(self):
         ''' run crf model '''
