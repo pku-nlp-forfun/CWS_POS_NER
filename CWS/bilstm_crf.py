@@ -156,14 +156,15 @@ class BiLSTMTrain(object):
             self.do_predict = True
             self.data_predict = data_predict
 
-    def train(self, max_epoch:int, max_max_epoch:int, tr_batch_size:int, display_num:int=5):
+    def train(self, max_epoch:int, max_max_epoch:int, tr_batch_size:int, display_num:int=5, do_finetune:bool=False):
         config = tf.ConfigProto()
         sess = tf.Session(config=config)
         sess.run(tf.global_variables_initializer())
-        ckpt = tf.train.latest_checkpoint('./checkpoint')
-        saver = tf.train.Saver()
-        saver.restore(sess, ckpt)
-        print('-->finetune the ckeckpoint:'+ckpt+'...')
+        if do_finetune:
+            ckpt = tf.train.latest_checkpoint('./checkpoint')
+            saver = tf.train.Saver()
+            saver.restore(sess, ckpt)
+            print(f'Finetune ckpt: {ckpt} ...')
 
         echo(0, 'Train shape', self.data_train[0].shape, self.data_train[1].shape)
         echo(0, 'Dev shape', self.data_dev[0].shape, self.data_dev[1].shape)
@@ -199,11 +200,12 @@ class BiLSTMTrain(object):
                 _loss, _ = sess.run(fetches, feed_dict)  
                 _losstotal += _loss
                 show_loss += _loss
-                if not (batch + 1) % display_batch and not epoch:
+                if not (batch + 1) % display_batch and epoch:
                     train_p, train_r, train_macro_f1, _ = self.test_epoch(self.data_train, sess, 'Train')
                     dev_p, dev_r, dev_macro_f1, _ = self.test_epoch(self.data_dev, sess, 'Dev')
                     if dev_macro_f1 > best_dev_acc:
                         test_p, test_r, test_macro_f1, predict = self.test_epoch(self.data_test, sess, 'Test')
+                        _ = self.test_epoch(self.data_predict, sess, 'Predict') 
                         best_dev_acc = dev_macro_f1
                         log(f'{epoch}-{batch}|{train_p:.2f}|{train_r:.2f}|{train_macro_f1:.2f}|{dev_p:.2f}|{dev_r:.2f}|{dev_macro_f1:.2f}|{test_p:.2f}|{test_r:.2f}|{test_macro_f1:.2f}|')
                     else:
@@ -212,20 +214,20 @@ class BiLSTMTrain(object):
                     echo(f'training loss={show_loss / display_batch}')
                     show_loss = 0.0
             mean_loss = _losstotal / tr_batch_num
-            if epoch:
-                save_path = saver.save(sess, self.model.model_save_path, global_step=(epoch + 1))
-                print('the save path is ', save_path)
-            if epoch:
-                train_p, train_r, train_macro_f1, _ = self.test_epoch(self.data_train, sess, 'Train')
-                dev_p, dev_r, dev_macro_f1, _ = self.test_epoch(self.data_dev, sess, 'Dev') 
-                
-                if dev_macro_f1 > best_dev_acc:
-                    test_p, test_r, test_macro_f1, predict = self.test_epoch(self.data_test, sess, 'Test')
-                    _ = self.test_epoch(self.data_predict, sess, 'Predict') 
-                    log(f'{epoch}|{train_p:.2f}|{train_r:.2f}|{train_macro_f1:.2f}|{dev_p:.2f}|{dev_r:.2f}|{dev_macro_f1:.2f}|{test_p:.2f}|{test_r:.2f}|{test_macro_f1:.2f}|')
-                    best_dev_acc = dev_macro_f1
-                else:
-                    log(f'{epoch}|{train_p:.2f}|{train_r:.2f}|{train_macro_f1:.2f}|{dev_p:.2f}|{dev_r:.2f}|{dev_macro_f1:.2f}|')
+            
+            save_path = saver.save(sess, self.model.model_save_path, global_step=(epoch + 1))
+            print('the save path is ', save_path)
+            
+            train_p, train_r, train_macro_f1, _ = self.test_epoch(self.data_train, sess, 'Train')
+            dev_p, dev_r, dev_macro_f1, _ = self.test_epoch(self.data_dev, sess, 'Dev') 
+            
+            if dev_macro_f1 > best_dev_acc:
+                test_p, test_r, test_macro_f1, predict = self.test_epoch(self.data_test, sess, 'Test')
+                _ = self.test_epoch(self.data_predict, sess, 'Predict') 
+                log(f'{epoch}|{train_p:.2f}|{train_r:.2f}|{train_macro_f1:.2f}|{dev_p:.2f}|{dev_r:.2f}|{dev_macro_f1:.2f}|{test_p:.2f}|{test_r:.2f}|{test_macro_f1:.2f}|')
+                best_dev_acc = dev_macro_f1
+            else:
+                log(f'{epoch}|{train_p:.2f}|{train_r:.2f}|{train_macro_f1:.2f}|{dev_p:.2f}|{dev_r:.2f}|{dev_macro_f1:.2f}|')
 
             echo(1, f'Training {self.data_train[1].shape[0]}, loss={mean_loss:g} ')
             echo(2, f'Epoch training {self.data_train[1].shape[0]}, loss={mean_loss:g}, speed={time.time() - start_time:g} s/epoch')
@@ -288,6 +290,17 @@ class BiLSTMTrain(object):
             
             with open(f"{con.RESULT['CWS']}_{time_str()}", 'w') as f:
                 f.write('\n'.join(test_predict_text))
+
+    def predict(self):
+        config = tf.ConfigProto()
+        sess = tf.Session(config=config)
+        sess.run(tf.global_variables_initializer())
+        
+        ckpt = tf.train.latest_checkpoint('./checkpoint')
+        saver = tf.train.Saver()
+        saver.restore(sess, ckpt)
+        _ = self.test_epoch(self.data_predict, sess, 'Predict') 
+        echo('Over')
 
 def test_params(num_seq: int, num_word: int, word_size: int, num_tag: int):
     x = np.random.randint(word_size, size=[num_seq, num_word]).astype(np.int32)
