@@ -68,28 +68,31 @@ Generate files:
 
 ### Paper
 
-CWS
+Sequence Tagging
+
+* [Bidirectional LSTM-CRF Models for Sequence Tagging](https://arxiv.org/abs/1508.01991)
+
+Chinese Word Segmentation
 
 * [State-of-the-art Chinese Word Segmentation with Bi-LSTMs](https://arxiv.org/abs/1808.06511) - Google AI Language
 * [Chinese Word Segmentation with Conditional Random Fields and Integrated Domain Knowledge](https://people.cs.umass.edu/~mccallum/papers/chineseseg.pdf)
 * [A Conditional Random Field Word Segmenter for Sighan Bakeoff 2005](https://nlp.stanford.edu/pubs/sighan2005.pdf)
 
-#### jieba
+Tools' reference
 
-#### pkuseg
+* pkuseg
+  * [ACM Digital Library - Fast online training with frequency-adaptive learning rates for Chinese word segmentation and new word detection](https://dl.acm.org/citation.cfm?id=2390560)
 
-* [ACM Digital Library](https://dl.acm.org/citation.cfm?id=2390560)
+      ```bibtex
+      @inproceedings{DBLP:conf/acl/SunWL12,
+      author = {Xu Sun and Houfeng Wang and Wenjie Li},
+      title = {Fast Online Training with Frequency-Adaptive Learning Rates for Chinese Word Segmentation and New Word Detection},
+      booktitle = {The 50th Annual Meeting of the Association for Computational Linguistics, Proceedings of the Conference, July 8-14, 2012, Jeju Island, Korea- Volume 1: Long Papers},
+      pages = {253--262},
+      year = {2012}}
+      ```
 
-```bibtex
-@inproceedings{DBLP:conf/acl/SunWL12,
-author = {Xu Sun and Houfeng Wang and Wenjie Li},
-title = {Fast Online Training with Frequency-Adaptive Learning Rates for Chinese Word Segmentation and New Word Detection},
-booktitle = {The 50th Annual Meeting of the Association for Computational Linguistics, Proceedings of the Conference, July 8-14, 2012, Jeju Island, Korea- Volume 1: Long Papers},
-pages = {253--262},
-year = {2012}}
-```
-
-### Related Tools
+### Related Tools and Libraries
 
 #### CRF
 

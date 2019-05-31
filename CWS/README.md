@@ -8,10 +8,6 @@
 - S: single character as a token
 - (O: Out of tags)
 
-## Bi-LSTM with CRF
-
-![Bi-LSTM with CRF](https://pic1.zhimg.com/80/v2-aad7ef8156b33c51efeb0f7f4b6f614d_hd.jpg)
-
 ## Approach
 
 1. Data preprocessing into the classification problem
@@ -85,9 +81,18 @@ Bi-LSTM
   - [data/download.sh](https://github.com/chantera/blstm-cws/blob/master/data/download.sh)
 - [luozhouyang/deepseg](https://github.com/luozhouyang/deepseg)
 
-### Appendix - Tensorflow CRF API
+### Appendix
+
+#### TensorFlow CRF API
 
 - [tensorflow/contrib/crf](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/crf)
 - [documentation](https://www.tensorflow.org/api_docs/python/tf/contrib/crf)
   - [tf.contrib.crf.crf_log_likelihood](https://www.tensorflow.org/api_docs/python/tf/contrib/crf/crf_log_likelihood)
   - [tf.contrib.crf.crf_decode](https://www.tensorflow.org/api_docs/python/tf/contrib/crf/crf_decode)
+
+### TensorFlow BiLSTM Related API
+
+- [TensorFlow Examples - bidirectional_rnn.py](https://github.com/aymericdamien/TensorFlow-Examples/blob/master/examples/3_NeuralNetworks/bidirectional_rnn.py)
+- [RIP Tutorial - Creating a bidirectional LSTM](https://riptutorial.com/tensorflow/example/17004/creating-a-bidirectional-lstm)
+- [tf.nn.bidirectional_dynamic_rnn](https://www.tensorflow.org/api_docs/python/tf/nn/bidirectional_dynamic_rnn)
+- [tf.keras.layers.Bidirectional](https://www.tensorflow.org/api_docs/python/tf/keras/layers/Bidirectional)
