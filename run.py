@@ -14,7 +14,7 @@ class MODE:
     generate_pos_from_cws = 3
 
 
-CURRENT_MODE = MODE.generate_pos_from_cws
+CURRENT_MODE = MODE.train_evaluate
 
 
 def pos_test_by_cws_gold(pos_data_set: str, pos_model):
@@ -46,7 +46,6 @@ def main(mode=MODE.train_evaluate):
         cws_model.run_model()
     print('Data over...')
 
-
     if mode == MODE.train_evaluate:
         print('Generating result...')
         raw_article = get_raw_article_from_cws_data(CWS_DATA['Test'])
@@ -65,12 +64,11 @@ def main(mode=MODE.train_evaluate):
         print('Testing POS result on Test set...')
         pos_test_by_cws_gold('Test', pos_model)
         exit(0)
-    
+
     if mode == MODE.generate_pos_from_cws:
         cws_input = load_cws_result_as_input(RESULT['CWS'])
         pos_predict = pos_model.predict_all(cws_input)
         from_pos_list_to_file(pos_predict, Final['POSResult'])
-
 
     if mode == MODE.train_evaluate:
         # Evaluate
