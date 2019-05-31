@@ -26,6 +26,12 @@
 \renewcommand\maketitlehooka{\null\mbox{}\vfill}
 \renewcommand\maketitlehookd{\vfill\null}
 
+% For url in footnote
+\usepackage{hyperref}
+\newcommand\fnurl[2]{
+  \href{#2}{#1}\footnote{\url{#2}}
+}
+
 \title{
   {NLP Course Report}  \\
   \textbf{Chinese Word Segmentation and POS Tagging}

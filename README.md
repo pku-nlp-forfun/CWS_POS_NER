@@ -13,6 +13,11 @@ Dependencies:
 python3 run.py
 ```
 
+Generate files:
+
+* `Evaluation.md` - markdown table of evaluation result
+* `Result/` - prediction result
+
 ### Structure
 
 ```txt
@@ -34,7 +39,13 @@ python3 run.py
 └── run.py       => the entire process
 ```
 
+* [CWS](CWS)
+* [POS](POS)
+* [NER](NER) (TODO)
+
 ## Task Description
+
+> Data and scripts given by TA
 
 ### Directory Structure
 
@@ -42,6 +53,8 @@ python3 run.py
   * devset
   * testset1
   * trainset
+  * final
+    * test2.txt - raw article
 * Evaluation
   * pos_evaluate.py
   * ner_evaluate.py
