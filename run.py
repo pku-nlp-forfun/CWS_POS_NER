@@ -33,6 +33,7 @@ def main(mode=MODE.train_evaluate):
     cws_train, pos_dict = processing_pos_data(POS_DATA['Train'])
     cws_dev, _ = processing_pos_data(POS_DATA['Dev'])
     cws_test, _ = processing_pos_data(POS_DATA['Test'])
+
     print('Generate models...')
     if mode != MODE.test_pos_only:
         cws_model = CWSModel(cws_train, cws_dev, cws_test)
@@ -42,6 +43,7 @@ def main(mode=MODE.train_evaluate):
     if mode != MODE.test_pos_only:
         print('Training CWS model...')
         cws_model.run_model()
+    print('Data over...')
 
     if mode == MODE.train_evaluate:
         print('Generating result...')
