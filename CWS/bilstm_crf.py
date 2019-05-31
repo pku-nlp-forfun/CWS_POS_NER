@@ -160,6 +160,10 @@ class BiLSTMTrain(object):
         config = tf.ConfigProto()
         sess = tf.Session(config=config)
         sess.run(tf.global_variables_initializer())
+        ckpt = tf.train.latest_checkpoint('./checkpoint')
+        saver = tf.train.Saver()
+        saver.restore(sess, ckpt)
+        print('-->finetune the ckeckpoint:'+ckpt+'...')
 
         echo(0, 'Train shape', self.data_train[0].shape, self.data_train[1].shape)
         echo(0, 'Dev shape', self.data_dev[0].shape, self.data_dev[1].shape)
