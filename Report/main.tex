@@ -29,6 +29,15 @@
 
 % For url in footnote
 \usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+    pdftitle={Chinese Word Segmentation and POS Tagging},
+    bookmarks=true,
+    pdfpagemode=FullScreen,
+}
 \newcommand\fnurl[2]{
   \href{#2}{#1}\footnote{\url{#2}}
 }
