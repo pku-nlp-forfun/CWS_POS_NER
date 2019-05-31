@@ -28,6 +28,7 @@ def pos_scorer(predict: str, goal: str, verbose: bool = True):
     cads = open(predict, encoding='utf-8').readlines()
     _, _, _, tag_precision, tag_recall, tag_fmeasure, _, tag_tnr = score(
         refs, cads, verbose=True)  # this verbose means return more result
+    log(f'|{tag_precision * 100:.2f}|{tag_recall * 100:.2f}|{tag_fmeasure * 100:.2f}|')
     if verbose:
         print(f'Tag precision: {tag_precision * 100:.2f}%')
         print(f'Tag recall: {tag_recall * 100:.2f}%')
