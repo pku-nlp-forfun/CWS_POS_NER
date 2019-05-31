@@ -20,7 +20,7 @@ RESULT = {
 }
 
 Final = {
-    'RawArticle': 'Data/testset2/test2.txt',
+    'RawArticle': 'Data/final/test2.txt',
     'CWSResult': 'Result/test_cws2.txt',
     'POSResult': 'Result/test_pos2.txt',
 }
