@@ -92,7 +92,7 @@ class CWSModel:
 
     def load_word_once(self, origin_set: List, MAX_LEN: int) -> List:
         ''' load word once '''
-        data_set = [[self.word2id[jj[0]] for jj in ii] +
+        data_set = [[self.word2id[jj[0]] if jj[0] in self.word2id else 0 for jj in ii] +
                     [0] * (MAX_LEN - len(ii)) for ii in origin_set]
         label = [[con.CWS_LAB2ID[jj[1]] for jj in ii] +
                  [0] * (MAX_LEN - len(ii)) for ii in origin_set]
