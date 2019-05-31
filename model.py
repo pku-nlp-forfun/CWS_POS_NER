@@ -234,7 +234,7 @@ class CWSModel:
                                  embed_size=256,
                                  hs=512)
         train = BiLSTMTrain(self.train_set, self.dev_set,
-                            self.test_set, model, self.predict_set)
+                            self.test_set, model, self.predict_set, POSModel)
         # train.predict()
         predict = train.train(100, 200, 64)
         predict = sum([ii[:self.test_set[2][jj]]
