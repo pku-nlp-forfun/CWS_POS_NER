@@ -2,13 +2,13 @@
     \centering
     \begin{tabular}{lccc}
     \toprule
-        Method          & Precision     & Recall   & F1-Score \\
+        Method          & F1-Score on Train Set  & F1-Score on Dev Set   & F1-Score on Test Set \\
     \midrule
-        Pure Mapping    & 95.39         & 95.39    & 95.39    \\
-        Add Rules       & 95.83         & 95.83    & 95.83    \\
-        Even More Rules & 95.86         & 95.86    & 95.86    \\
+        Pure Mapping    & 97.98                  & 95.57                 & 95.39                \\
+        Add Rules       & -                      & -                     & 95.83                \\
+        Even More Rules & 97.98                  & 96.06                 & 95.86                \\
     \bottomrule
     \end{tabular}
-\caption{Part-of-speech tagging on Gold CWS (in \%)}
+\caption{Part-of-speech tagging on Gold CWS (in \%) (precision = recall = f1-score)}
 \label{tab:pos_on_gold_cws}
 \end{table}

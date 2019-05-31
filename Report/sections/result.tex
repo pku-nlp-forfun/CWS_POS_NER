@@ -3,6 +3,12 @@
 
 （描述实验结果并分析原因）
 
+\subsection*{Word Segmentation}
+
+在训练集、开发集与测试集数据中测试结果。（表~\ref{tab:cws_result}）
+
+\input{figures/cws_result.tex}
+
 \subsection*{Part-of-speech Tagging}
 
 \subsubsection*{Test on the gold word segmentation result}
@@ -10,3 +16,9 @@
 在这个测试之中，排除了分词错误的可能性，利用从 testset1 中的 test\_pos1.txt 中提取出分词结果（不使用 test\_cws1.txt 是因为里面的 tag 全是乱的完全无法使用）。（表~\ref{tab:pos_on_gold_cws}）
 
 \input{figures/pos_on_gold_cws.tex}
+
+\subsection*{Overall Test}
+
+将所有测试文档还原成原始文档进行分析的结果。（表~\ref{tab:pos_with_cws}）
+
+\input{figures/pos_with_cws.tex}
