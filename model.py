@@ -58,7 +58,7 @@ class CWSModel:
         self.train_set = self.load_word_once(train_set, MAX_LEN)
         self.dev_set = self.load_word_once(dev_set, MAX_LEN)
         self.test_set = self.load_word_once(test_set, MAX_LEN)
-        self.predict_set = *self.load_word_once(predict_set, MAX_LEN)
+        self.predict_set = self.load_word_once(predict_set, MAX_LEN)
         self.MAX_LEN = MAX_LEN
 
     def statistical_data(self, train_set: List, dev_set: List, test_set: List, do_reshape: bool = True):
