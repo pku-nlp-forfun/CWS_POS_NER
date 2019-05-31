@@ -11,15 +11,15 @@ class MODE:
     train_evaluate = 0
     test_pos_only = 1
     predict_final = 2
+    generate_pos_from_cws = 3
 
 
-CURRENT_MODE = MODE.train_evaluate
+CURRENT_MODE = MODE.generate_pos_from_cws
 
 
 def pos_test_by_cws_gold(pos_data_set: str, pos_model):
     # This shit is insane = =
     # 10<sup>9<> WTF????????? but in POS_DATA['POS'] is correct....zzzz
-    # cws_gold = load_cws_result_as_input(CWS_DATA['Test'])
     pos_data = POS_DATA[pos_data_set]
     cws_gold = load_cws_result_from_pos_as_input(pos_data)
     pos_predict = pos_model.predict_all(cws_gold)
@@ -36,12 +36,12 @@ def main(mode=MODE.train_evaluate):
     predict_text, _ = processing_pos_data(Final['RawArticle'])
 
     print('Generate models...')
-    if mode != MODE.test_pos_only:
+    if mode not in (MODE.test_pos_only, MODE.generate_pos_from_cws):
         cws_model = CWSModel(cws_train, cws_dev, cws_test, predict_text)
     pos_model = POSModel(pos_dict, use_rule=True)
 
     # Train
-    if mode != MODE.test_pos_only:
+    if mode not in (MODE.test_pos_only, MODE.generate_pos_from_cws):
         print('Training CWS model...')
         cws_model.run_model()
     print('Data over...')
@@ -65,6 +65,12 @@ def main(mode=MODE.train_evaluate):
         print('Testing POS result on Test set...')
         pos_test_by_cws_gold('Test', pos_model)
         exit(0)
+    
+    if mode == MODE.generate_pos_from_cws:
+        cws_input = load_cws_result_as_input(RESULT['CWS'])
+        pos_predict = pos_model.predict_all(cws_input)
+        from_pos_list_to_file(pos_predict, Final['POSResult'])
+
 
     if mode == MODE.train_evaluate:
         # Evaluate
