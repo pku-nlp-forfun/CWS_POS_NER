@@ -1,7 +1,7 @@
 from dataset import processing_pos_data, get_raw_article_from_cws_data, get_raw_article
 from constant import POS_DATA, CWS_DATA, RESULT, Final
 from evaluate import total_evaluate
-from model import CWSModel, POSModel
+from model import CWSModel, POSModel, CWS_MODEL
 from POS.pos_data import load_cws_result_as_input, from_pos_list_to_file, load_cws_result_from_pos_as_input
 import os
 from enum import Enum
@@ -37,7 +37,7 @@ def main(mode=MODE.train_evaluate):
 
     print('Generate models...')
     if mode not in (MODE.test_pos_only, MODE.generate_pos_from_cws):
-        cws_model = CWSModel(cws_train, cws_dev, cws_test, predict_text)
+        cws_model = CWSModel(cws_train, cws_dev, cws_test, predict_text, CWS_MODEL.CRF)
     pos_model = POSModel(pos_dict, use_rule=True)
 
     # Train

@@ -14,12 +14,15 @@ from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.pipeline import make_pipeline
 from typing import List, Dict
 from util import echo
+import torch
+from pytorch_pretrained_bert import BertModel, BertTokenizer
 
 
 class EMBED_TYPE(Enum):
     ONE_HOT = 0
     TF_IDF = 1
     FAST_TEXT = 2
+    BERT = 3
 
 
 class CWS_MODEL(Enum):
@@ -27,7 +30,7 @@ class CWS_MODEL(Enum):
     BILSTM = 1
 
 
-embed_type = EMBED_TYPE.FAST_TEXT
+embed_type = EMBED_TYPE.BERT
 
 
 class CWSModel:
@@ -164,6 +167,30 @@ class CWSModel:
         for ii in n_gram_dict[0].keys():
             echo(0, transformed[0][ii])
         return transformed.reshape([num_seq, num_word, num_fea])
+
+    def bert(self, word_set: List, seq: List, n_gram:int=4):
+        ''' bert '''
+        bert_dir = '../bert/chinese_L-12_H-768_A-12'
+        bert = BertModel.from_pretrained(bert_dir)
+        tokenizer = BertTokenizer.from_pretrained(f'{bert_dir}/chinese_L-12_H-768_A-12/vocab.txt')
+        word_set = np.array(word_set)
+        num_fea = len(self.word2id)
+        num_seq, num_word = word_set.shape
+        echo(0, num_seq, num_word, num_fea)
+        origin_set_one = word_set.reshape(-1)
+        id2word = {jj: ii for ii, jj in self.word2id.items()}
+
+        n_gram_dict = self.prepare_n_gram(origin_set_one, seq, n_gram)
+        n_gram_word = [' '.join([id2word[jj] for jj, kk in ii.items() if kk]) for ii in n_gram_dict]
+        transformed = []
+        for ii in n_gram_word:
+            ids = torch.tensor([tokenizer.convert_tokens_to_ids(tokenizer.tokenize(ii))])
+            transformed.append(bert(ids, output_all_encoded_layers=False)[-1][0].detach().numpy())
+        transformed += [np.zeros(len(transformed[0]))] * (num_seq * num_word - len(n_gram_dict))
+
+        echo(1, 'Bert Over')
+    
+        return transformed.reshape([num_seq, num_word, num_fea]) 
 
     @jit
     def prepare_n_gram(self, origin_set_one: List, seq: List, n_gram: int = 4):
