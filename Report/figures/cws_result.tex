@@ -1,13 +1,16 @@
 \begin{table}[htbp!]
     \centering
-    \begin{tabular}{llccccccccc}
+    \begin{tabular}{llcccccccccc}
     \toprule
-        \multicolumn{1}{c}{\multirow{2}{*}{Model}} & \multirow{2}{*}{Param}      & \multicolumn{3}{c}{Train Set}     & \multicolumn{3}{c}{Dev Set}           & \multicolumn{3}{c}{Test Set}          \\
-        \multicolumn{1}{c}{}                       &                             & P             & R        & F1     & P             & R        & F1         & P             & R        & F1         \\
+        \multicolumn{1}{c}{\multirow{2}{*}{Model}} & \multirow{2}{*}{Embed}      & \multicolumn{3}{c}{Train Set}     & \multicolumn{3}{c}{Dev Set}           & \multicolumn{3}{c}{Test Set}    &\multirow{2}{*}{Epoch}       \\
+        \multicolumn{1}{c}{}                       &                             & P             & R        & F1     & P             & R        & F1         & P             & R        & F1   &       \\
         \midrule
-        CRF      & default                                                       & 100.00        & 100.00   & 100.00  & 100.00       & 100.00   & 100.00     & 100.00        & 100.00   & 100.00     \\
+        CRF        & One-Hot  & \bf{98.86}   & \bf{99.19}   & \bf{99.03}    & 76.36 & 75.06 & 75.70  & 78.54  & 75.68  & 77.08   & 130        \\
+        CRF        & Tf-idf   & 33.87   & 29.69   & 31.64    & 31.14 & 37.42 & 33.99  & 31.69  & 37.42  & 34.32   & 90         \\
+        CRF        & FastText & 30.24   & 33.21   & 31.65    & 34.59 & 37.29 & 35.89  & 36.13  & 37.99  & 37.03   & 50         \\
+        BiLSTM-CRF & One-Hot  & 94.46   & 95.19   & 94.83    & \bf{90.02} & \bf{91.08} & \bf{90.55}  & \bf{91.01}  & \bf{91.32}  & \bf{91.16}   & 8-75       \\
     \bottomrule
     \end{tabular}
-\caption{Word segmentation (in \%)}
+\caption{Best Evaluation in DevSet about Word segmentation (in \%)}
 \label{tab:cws_result}
 \end{table}
