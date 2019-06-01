@@ -66,7 +66,7 @@ class CWSModel:
 
     def statistical_data(self, train_set: List, dev_set: List, test_set: List, do_reshape: bool = True):
         ''' statistical data '''
-        if embed_type == EMBED_TYPE.FAST_TEXT:
+        if embed_type == EMBED_TYPE.FAST_TEXT or embed_type == EMBED_TYPE.BERT:
             pre_set = [*train_set, *test_set, *dev_set]
         else:
             pre_set = train_set
@@ -131,6 +131,8 @@ class CWSModel:
             x = self.tf_idf(x, seq)
         elif embed_type == EMBED_TYPE.FAST_TEXT:
             x = self.char_embed(x)
+        elif embed_type == EMBED_TYPE.BERT:
+            x = self.bert(x)
 
         return x, y, seq_len, seq
 
