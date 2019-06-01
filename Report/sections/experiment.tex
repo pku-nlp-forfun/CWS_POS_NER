@@ -12,7 +12,7 @@
 
 最后是模型的评价，原先使用了所提供的评价脚本，却发现里面有很多的坑，特别是因为数据中的"//w"和"</sup>"这类数据会被误判成词性，还有空白行也会一同被纳入评测，这导致最后评分出来的表现有很大的误差，故为了保险起见还是针对了这部份进行我们自己版本的改正。
 
-\subsection*{CWS}
+\subsection*{Detail of Word Segmentation}
 
 在分词过程中，测试了CRF单模型，Embed使用了One-Hot, TF\_IDF, FastText.
 

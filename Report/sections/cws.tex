@@ -1,7 +1,8 @@
 \subsection{Word Segmentation}
 \label{sec:cws}
 
-\subsection*{CRF}
+\subsubsection{CRF}
+\label{sec:crf}
 
 条件随机场~\cite{lafferty2001conditional}是一种无向概率图模型，常用在序列标注问题中。
 
@@ -36,7 +37,8 @@ $s_i$为第i个的状态特征，对应权重$μ_i$, 其用来表示是否满足
 
 然后对Score进行求和归一化得到其概率值。
 
-\subsection*{BiLSTM CRF}
+\subsubsection{BiLSTM CRF}
+\label{sec:bilstm_crf}
 
 如果我们用单模型，既在给定特征的基础上做一个最大概率分布计算，那么我们相当于假定我们的特征能很好的表示当前上下文信息，能表示需要分词的Context。
 

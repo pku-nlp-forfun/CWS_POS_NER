@@ -1,8 +1,6 @@
 \section{实验结果}
 \label{sec:result}
 
-（描述实验结果并分析原因）
-
 \subsection*{Word Segmentation}
 
 在训练集、开发集与测试集数据中测试结果。（表~\ref{tab:cws_result}）
@@ -11,9 +9,13 @@
 
 \subsection*{Part-of-speech Tagging}
 
-\subsubsection*{Test on the gold word segmentation result}
+% \subsubsection*{Test on the gold word segmentation result}
 
 在这个测试之中，排除了分词错误的可能性，利用从 testset1 中的 test\_pos1.txt 中提取出分词结果（不使用 test\_cws1.txt 是因为里面的 tag 全是乱的完全无法使用）。（表~\ref{tab:pos_on_gold_cws}）
+
+由于后面为使整体一致，补上于训练集和开发集上的评价结果，但中间状态由于并不是一个定版，故有些测试数据无法得到。
+
+关于这些数据可以观察到几点，首先 precision、recall、f1-score 值在此项测试中会相等的原因在词性标注的实验原理中~\ref{sec:pos}已经叙述过了。再来是训练集并不因规则而有所提升，这也很容易想，因为由于我们是从训练集建立的关联关系，故训练集并不会存在 OOV 的问题，故提升上只会在开发集和测试集中体现。
 
 \input{figures/pos_on_gold_cws.tex}
 
