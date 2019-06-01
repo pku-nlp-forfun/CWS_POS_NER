@@ -19,6 +19,12 @@
 4. Evaluate in Dev croups
 5. Predict in best evaluation epochs and generate result
 
+![image](https://cdn.nlark.com/yuque/0/2019/png/104214/1559369780794-69fd076c-8f3b-4895-ac7f-5533aff25df2.png)
+
+![image](https://cdn.nlark.com/yuque/0/2019/png/104214/1559369788298-5d257b6b-bbc1-4c9c-a8ff-c9a3dbb4d564.png)
+
+![image](https://cdn.nlark.com/yuque/0/2019/png/104214/1559369788341-7501bae0-9df0-4a18-821a-04551c1cd52c.png)
+
 ## Experiment
 
 | Model      | embed    | Train p | Train r | Train f1 | Dev p | Dev r | Dev f1 | Test p | Test n | Test f1 | Best Epoch |
@@ -62,7 +68,20 @@ session.run(tf.global_variables_initializer(), feed_dict={train_x_init: train_x}
 
 ### F1_score not equal
 
-check the script
+check the script and find the 391 row in 'pos_evaluation.py' have error in our dataSet.
+
+### Memory Used
+
+1. crf one-hot -> 120GB+
+2. BiLSTM-CRF -> 42GB+
+
+### Numba not support {**{}, **{}}
+
+> NotImplementedError: Failed in object mode pipeline (step: analyzing bytecode) Use of unknown opcode BUILD_MAP_UNPACK at
+
+In numba all thing you can do is to loop.
+
+- [Numba 0.39.0, use of unknown opcode FORMAT_VALUE, python 3.6](https://github.com/numba/numba/issues/3250)
 
 ## Resources
 
@@ -83,6 +102,10 @@ Bi-LSTM
 - [chantera/blstm-cws](https://github.com/chantera/blstm-cws)
   - [data/download.sh](https://github.com/chantera/blstm-cws/blob/master/data/download.sh)
 - [luozhouyang/deepseg](https://github.com/luozhouyang/deepseg)
+
+Embed in Chinese
+
+- [汉语 Word Embeddings 预训练 Pretrain 数据](http://www.studyai.com/article/3508ae86)
 
 ### Appendix
 
